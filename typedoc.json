@@ -1,0 +1,43 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "./src/index.ts"
+    ],
+    "out": "docs/build",
+    "sort": [
+        "source-order"
+    ],
+    "media": "media",
+    "categorizeByGroup": false,
+    "searchCategoryBoosts": {
+        "Component": 2,
+        "Model": 1.2
+    },
+    "searchGroupBoosts": {
+        "Classes": 1.5
+    },
+    "navigationLinks": {
+        "Docs": "https://typedoc.org/guides/overview",
+        "GitHub": "https://github.com/TypeStrong/typedoc"
+    },
+    "sidebarLinks": {
+        "API": "https://typedoc.org/api"
+    },
+    "pluginPages": {
+        "source": "docs",
+        "pages": [
+            {
+                "title": "Axios Interceptor Plugins",
+                "source": "readme.md",
+            },
+            {
+                "title": "Request Plugins",
+                "source": "request.md",
+            },
+            {
+                "title": "Response Plugins",
+                "source": "response.md",
+            },
+        ]
+    }
+}

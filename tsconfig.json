@@ -1,0 +1,92 @@
+{
+  "buildOnSave": false,
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    /** strict mode ...*/
+    // "noImplicitUseStrict": true,
+    "alwaysStrict": true,
+    "baseUrl": "src",
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "diagnostics": true,
+    "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "jsx": "preserve",
+    "jsxFactory": "h" /* Specify the JSX factory function to use when targeting react JSX emit, e.g. React.createElement or h. */,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ],
+    "moduleResolution": "node",
+    /**
+    You shouldn't use "noEmit": true in your tsconfig.json if you compile with tsc.
+    From compiler options description --noEmit - Do not emit outputs.*/
+    "noEmit": false,
+    "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,
+    "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
+    "noImplicitThis": true /* Raise error on 'this' expressions with an implied 'any' type. */,
+    "outDir": "dist" /* Redirect output structure to the directory. */,
+    "paths": {
+      "@/*": [
+        "*"
+      ],
+      /*
+       *     A L I A S   P A T H
+       *     需要同時設置 vue.config.js - alias
+       **/
+      "~/*": [
+        "*"
+      ]
+    },
+    "resolveJsonModule": true,
+    "rootDirs": [
+      "src",
+      "dist"
+    ],
+    
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "strictBindCallApply": true /**/,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true /* Enable strict null checks. */,
+    "strictPropertyInitialization": true,
+    // 這裡將 module / target 設一樣是為了解決 jest
+    // compile 後會出現 SyntaxError, 真正的 module / target
+    // 見 tsconfig.build.json
+    "module": "es2020",
+    "target": "es2020",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ] 
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".vite-storybook",
+    "storybook-static",
+  ],
+  "include": [
+    "@types",
+    "src",
+    "src/index.ts",
+    "src/**/*.ts",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx",
+    "__tests__/*.tsx",
+    "__tests__/*.ts",
+    "src/index.ts",
+    "jest.d.ts"
+  ],
+  // support jest-expect message, see: https://github.com/mattphillips/jest-expect-message
+  "files": ["node_modules/jest-expect-message/types/index.d.ts"],
+}

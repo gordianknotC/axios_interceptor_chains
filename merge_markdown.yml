@@ -1,0 +1,10 @@
+
+input:
+ docs/readme.md:  {noYAML: true, doctoc: true, replace: {<!--#-->: "# 前端常用工具:"}}
+ docs/request.md:  {noYAML: true, doctoc: true, replace: {<!--#-->: "# Request Plugin:"}}
+ docs/response.md:  {noYAML: true, doctoc: true, replace: {<!--#-->: "# Response Plugin:"}} 
+output: 
+  name: README.md
+  doctoc:
+    title: "table of content"
+    all: true

@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".vite-storybook",
+    "storybook-static",
+    "__tests__"
+  ],
+}
