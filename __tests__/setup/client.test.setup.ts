@@ -6,19 +6,21 @@ export type SuccessResponse = {succeed: boolean};
 
 const timeout = 10 * 1000;
 const baseURL = "";
+export const authToken =  "I'M Auth Token";
+export const formatHeader = {format: "mock"};
 export const remoteClientOption: RemoteClientOption = {
   config: {
     baseURL,
     timeout
   },
   requestChain: [
-    new UpdateAuthHeaderPlugin(()=>"I'M Auth Token"), 
-    new UpdateExtraHeaderPlugin(()=>{
-      common:{Authorization: "ExtraToken"}
-    })
+    new UpdateAuthHeaderPlugin(function(){
+      return "I'M Auth Token";
+    }), 
+    new UpdateExtraHeaderPlugin(()=>formatHeader)
   ],
   responseChain: [
     new AuthResponseGuard(),
   ]
 };
-// const client = new BaseRemoteClient(remoteClientOption);
+

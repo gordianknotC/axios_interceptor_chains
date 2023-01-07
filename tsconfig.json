@@ -80,6 +80,7 @@
     "src",
     "src/index.ts",
     "src/**/*.ts",
+    "__tests__/tests/*.ts",
     "__tests__/**/*.ts",
     "__tests__/**/*.tsx",
     "__tests__/*.tsx",

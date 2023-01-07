@@ -16,7 +16,7 @@ abstract class BaseClientServiceResponsePlugin
     return super.canProcess(config);;
   }
 
-  protected canProcessError(error: AxiosError<unknown, any>): boolean {
+  canProcessError(error: AxiosError<unknown, any>): boolean {
     return super.canProcessError(error);
   }
 

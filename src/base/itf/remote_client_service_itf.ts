@@ -4,8 +4,8 @@ export enum EClientStage {
     idle,
     fetching,
     authorizing,
-    success,
-    error
+    // success,
+    // error
 }
 
 export type DataResponse<T, P=any> = {

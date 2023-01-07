@@ -4,6 +4,44 @@ import type { IRemoteClientService,  } from "../itf/remote_client_service_itf";
 
 
 
+
+function onRequestFulFilled(chain: BaseClientServicesPluginChains<any>){
+  return (config: AxiosRequestConfig)=>{
+    console.log("onRequestFulFilled called 1");
+    if (chain.canProcess(config)){
+      return chain.process(config);
+    }
+    return config;
+  }
+}
+function onRequestError(chain: BaseClientServicesPluginChains<any>){
+  return (error: AxiosError)=>{
+    console.log("onRequestError called 1");
+    if (chain.canProcessError(error)){
+      return chain.processError(error);
+    }
+    return Promise.reject(error);
+  }
+}
+function onResponseFulFilled(chain: BaseClientServicesPluginChains<any>){
+  return (config: AxiosRequestConfig)=>{
+    console.log("onResponseFulFilled called 1", config);
+    if (chain.canProcess(config)){
+      return chain.process(config);
+    }
+    return config;
+  }
+}
+function onResponseError(chain: BaseClientServicesPluginChains<any>){
+  return (error: AxiosError)=>{
+    console.log("onResponseError called 1", error);
+    if (chain.canProcessError(error)){
+      return chain.processError(error);
+    }
+    return Promise.reject(error);
+  }
+}
+
 /**
  * @typeParam INPUT -  process function 的輸入型別
  * @typeParam OUTPUT - process function 的輸出型別
@@ -15,41 +53,21 @@ export abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INPUT> {
     interceptors: "response" | "request"
   ){
     assert(chain.length >= 1);
-    const master = chain[0];
+    const masterChain = chain[0];
     const tail = chain.slice(1);
-    master.init(client);
+    masterChain.init(client);
     if (tail.length >= 1){
-      master.addAll(tail)
+      masterChain.addAll(tail)
     }
     if (interceptors == "response"){
       client.client.interceptors.response.use(
-        function(response: AxiosResponse){
-          if (master.canProcess(response)){
-            return master.process(response);
-          }
-          return response;
-        },
-        function(error: AxiosError){
-          if (master.canProcessError(error)){
-            return master.processError(error);
-          }
-          return Promise.reject(error);
-        }
+        onResponseFulFilled(masterChain),
+        onResponseError(masterChain)
       )
     }else{
       client.client.interceptors.request.use(
-        function(config: AxiosRequestConfig){
-          if (master.canProcess(config)){
-            return master.process(config);
-          }
-          return config;
-        },
-        function(error: AxiosError){
-          if (master.canProcessError(error)){
-            return master.processError(error);
-          }
-          return Promise.reject(error);
-        }
+        onRequestFulFilled(masterChain),
+        onRequestError(masterChain)
       )
     }
   }
@@ -59,43 +77,48 @@ export abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INPUT> {
   abstract client?: IRemoteClientService<any, any, any>;
   abstract process(config: INPUT): OUTPUT;
   abstract processError(error: any): Promise<any>;
-  addNext(next: BaseClientServicesPluginChains<INPUT, OUTPUT>) {
+  protected addNext(next: BaseClientServicesPluginChains<INPUT, OUTPUT>) {
     assert(
       () => this.client != undefined,
       "undefined client"
     );
     this.next = next;
     next.prev = this;
+    next.init(this.client!);
   }
-  addPrev(prev: BaseClientServicesPluginChains<INPUT, OUTPUT>) {
+  protected addPrev(prev: BaseClientServicesPluginChains<INPUT, OUTPUT>) {
     assert(
       () => this.client != undefined,
       "undefined client"
     );
     this.prev = prev;
     prev.next = this;
+    prev.init(this.client!);
   }
-  addAll(all: BaseClientServicesPluginChains<INPUT, OUTPUT>[]) {
-    if (all.length == 1) return;
+  addAll(_all: BaseClientServicesPluginChains<INPUT, OUTPUT>[]) {
     assert(
       () => this.client != undefined,
       "undefined client"
     );
-    const allSerial = [this, ...all];
+    const allSerial = [this, ..._all];
     for (let i = 0; i < allSerial.length - 1; i++) {
-      all[i].init(this.client!);
-      all[i].addNext(all[i + 1]);
+      const next = allSerial[i + 1];
+      if (next)
+      allSerial[i].addNext(next);
     }
   }
 
-  protected canGoNext(config: INPUT): boolean {
+  /** default: true */
+  public canGoNext(config: INPUT): boolean {
     return this.next != undefined;
   }
-  protected canProcess(config: INPUT): boolean {
+  /** default: true */
+  public canProcess(config: INPUT): boolean {
     return true;
   }
-  protected canProcessError(error: AxiosError): boolean {
-    return true;
+  /** default: false */
+  public canProcessError(error: AxiosError): boolean {
+    return false;
   }
   init(client: IRemoteClientService<any, any, any>) {
     this.client = client;

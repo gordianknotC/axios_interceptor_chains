@@ -5,7 +5,7 @@ import type {
   IRemoteClientService,
 } from "@/base/itf/remote_client_service_itf";
 import { NotImplementedError } from "@gdknot/frontend_common";
-import type { AxiosRequestConfig } from "axios";
+import type { AxiosError, AxiosRequestConfig } from "axios";
 import {merge} from "merge-anything"
 
 
@@ -25,18 +25,29 @@ export class BaseRequestHeaderUpdater<
     AxiosRequestConfig<any>
   >;
 
-  protected getRequestHeader(): any {
+  _enabled: boolean = true;
+  enable(){
+    this._enabled = true;
+  }
+  disable(){
+    this._enabled = false;
+  }
+  protected appendRequestHeader(): any {
     throw new NotImplementedError("getRequestHeader");
   }
-
+  canProcess(config: AxiosRequestConfig<any>): boolean {
+    if (this._enabled)
+      return super.canProcess(config);
+    return false;
+  }
   process(config: AxiosRequestConfig<any>): AxiosRequestConfig<any> {
     const header = config.headers as any as AxiosConfigHeader;
-    merge(header, this.getRequestHeader());
+    config.headers = merge(header, this.appendRequestHeader());
+    console.log("return processed header:", this.appendRequestHeader(), JSON.stringify(config.headers));
     return super.process(config);
   }
-
-  processError(error: any): Promise<any> {
-    return super.processError(error);
+  canProcessError(error: AxiosError<unknown, any>): boolean {
+    return false;
   }
 }
 
@@ -50,10 +61,7 @@ export class UpdateAuthHeaderPlugin<
   ){
     super();
   }
-  processError(error: any): Promise<any> {
-    throw new Error("Method not implemented.");
-  }
-  protected getRequestHeader(): Partial<AxiosConfigHeader> {
+  protected appendRequestHeader(): Partial<AxiosConfigHeader> {
     return {
       common: {
         Authorization: this.tokenGetter(),
@@ -72,13 +80,14 @@ export class UpdateExtraHeaderPlugin<
   ){
     super();
   }
-  processError(error: any): Promise<any> {
-    throw new Error("Method not implemented.");
-  }
-  protected getRequestHeader() {
+  protected appendRequestHeader() {
+    console.log("this.headerGetter:", this.headerGetter());
     return {
       ...this.headerGetter(),
     };
   }
 }
+
+
+
 
