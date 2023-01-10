@@ -1,4 +1,4 @@
-import type { AxiosError, AxiosRequestConfig } from "axios";
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { BaseClientServicesPluginChains } from "./plugin_chains_impl";
 
 export type AxiosConfigHeader = {
@@ -10,6 +10,9 @@ export type AxiosConfigHeader = {
 export abstract class BaseClientServiceRequestPlugin 
   extends BaseClientServicesPluginChains<AxiosRequestConfig> 
 {
+  constructor(){
+    super();
+  }
   canGoNext(config: AxiosRequestConfig): boolean {
     return super.canGoNext(config);
   }
@@ -27,10 +30,10 @@ export abstract class BaseClientServiceRequestPlugin
     return config;
   }
 
-  processError(error: any): Promise<any> {
+  processError(error: AxiosError): Promise<AxiosResponse> {
     if (this.next) {
       return this.next.processError(error);
     }
-    return Promise.reject(error);
+    return Promise.reject(error.response);
   }
 }

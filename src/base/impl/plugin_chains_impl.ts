@@ -2,11 +2,10 @@ import { assert, AssertMsg } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse, AxiosResponseHeaders } from "axios";
 import type { IRemoteClientService,  } from "../itf/remote_client_service_itf";
 
-
-
-
+const byPassAll = false;
 function onRequestFulFilled(chain: BaseClientServicesPluginChains<any>){
   return (config: AxiosRequestConfig)=>{
+    if (byPassAll) return config;
     console.log("onRequestFulFilled called 1");
     if (chain.canProcess(config)){
       return chain.process(config);
@@ -16,15 +15,17 @@ function onRequestFulFilled(chain: BaseClientServicesPluginChains<any>){
 }
 function onRequestError(chain: BaseClientServicesPluginChains<any>){
   return (error: AxiosError)=>{
+    if (byPassAll) return Promise.reject(error.response);
     console.log("onRequestError called 1");
     if (chain.canProcessError(error)){
       return chain.processError(error);
     }
-    return Promise.reject(error);
+    return Promise.reject(error.response);
   }
 }
 function onResponseFulFilled(chain: BaseClientServicesPluginChains<any>){
   return (config: AxiosRequestConfig)=>{
+    if (byPassAll) return config;
     console.log("onResponseFulFilled called 1", config);
     if (chain.canProcess(config)){
       return chain.process(config);
@@ -34,13 +35,15 @@ function onResponseFulFilled(chain: BaseClientServicesPluginChains<any>){
 }
 function onResponseError(chain: BaseClientServicesPluginChains<any>){
   return (error: AxiosError)=>{
+    if (byPassAll) return Promise.reject(error.response);
     console.log("onResponseError called 1", error);
     if (chain.canProcessError(error)){
       return chain.processError(error);
     }
-    return Promise.reject(error);
+    return Promise.reject(error.response);
   }
 }
+
 
 /**
  * @typeParam INPUT -  process function 的輸入型別
@@ -71,12 +74,12 @@ export abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INPUT> {
       )
     }
   }
-
+  constructor(){}
   abstract prev?: BaseClientServicesPluginChains<INPUT, OUTPUT>;
   abstract next?: BaseClientServicesPluginChains<INPUT, OUTPUT>;
   abstract client?: IRemoteClientService<any, any, any>;
   abstract process(config: INPUT): OUTPUT;
-  abstract processError(error: any): Promise<any>;
+  abstract processError(error: AxiosError): Promise<AxiosResponse>;
   protected addNext(next: BaseClientServicesPluginChains<INPUT, OUTPUT>) {
     assert(
       () => this.client != undefined,

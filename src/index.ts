@@ -21,7 +21,7 @@ export { BaseClientServiceResponsePlugin } from "./base/impl/response_plugins_im
 //  PRESETS
 //
 export {
-  BaseRequestHeaderUpdater,
+  BaseRequestHeaderGuard,
   UpdateAuthHeaderPlugin,
   UpdateExtraHeaderPlugin,
 } from "./presets/header_updater";

@@ -10,11 +10,13 @@ const jestConfig: JestConfigWithTsJest = {
   preset: "ts-jest/presets/default-esm", // or other ESM presets
   testEnvironment: "jsdom",
   extensionsToTreatAsEsm: [".ts"], // this is required in Jest doc https://jestjs.io/docs/next/configuration#extensionstotreatasesm-arraystring
-  testRegex: ["(/__tests__/tests/.*|(\\.|/)(test|spec))\\.[jt]sx?$"],
+  testRegex: [
+    "(/__tests__/tests/.*|(\\.|/)(test|spec))\\.[jt]sx?$"
+  ],
   testPathIgnorePatterns: [
-    "./__tests__/setup/*.ts",
-    "./__tests__/mocks/*.ts",
-    "./__tests__/helper/*.ts"
+    // "./__tests__/setup/*.ts",
+    // "./__tests__/mocks/*.ts",
+    // "./__tests__/helper/*.ts"
   ],
   transform: {
     "^.+\\.m?[tj]sx?$": [

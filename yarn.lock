@@ -968,10 +968,10 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@gdknot/frontend_common@0.6.3":
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/@gdknot/frontend_common/-/frontend_common-0.6.3.tgz#a783d7b165727202955b41078fc922ede8a7b505"
-  integrity sha512-FPBQsqRoZCUlY/QPHZ5j3HI75BW1j8IehQ48TmtF10Sw0q+dO4YUWvOrPUN4V/gizA/KxRNoM+dSwGrhg0BN1Q==
+"@gdknot/frontend_common@0.7.32":
+  version "0.7.3"
+  resolved "https://registry.yarnpkg.com/@gdknot/frontend_common/-/frontend_common-0.7.3.tgz#d88343982621a3f99648abca4b615129f78bfd97"
+  integrity sha512-LboAHEzArFLMMyAHbxaIhNekKrha5fWJX7e3jsqGVY9cV1ysxOEZoYeTfTLb7ydx0E7l9KQJ15ADI68FB6hnEw==
   dependencies:
     merge-anything "^5.0.4"
 
@@ -2334,6 +2334,11 @@ date-fns@^2.29.1:
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.29.3.tgz#27402d2fc67eb442b511b70bbdf98e6411cd68a8"
   integrity sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==
 
+debounce@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.1.tgz#38881d8f4166a5c5848020c11827b834bcb3e0a5"
+  integrity sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==
+
 debug@4, debug@^4.0.0, debug@^4.1.0, debug@^4.1.1, debug@^4.3.2, debug@^4.3.4:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
@@ -2562,6 +2567,11 @@ eslint-config-prettier@^8.5.0:
   version "8.6.0"
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.6.0.tgz#dec1d29ab728f4fa63061774e1672ac4e363d207"
   integrity sha512-bAF0eLpLVqP5oEVUFKpMA+NnRFICwn9X8B5jrR9FcqnYBuPbqWEjTEspPWMj5ye6czoSLDweCzSo3Ko7gGrZaA==
+
+eslint-plugin-cross-import@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-cross-import/-/eslint-plugin-cross-import-0.0.4.tgz#31e21d83f2f4932eec1c6acb97daf5b123049c3e"
+  integrity sha512-byDDPrn0x4EDxM27Yf25y5/taYFvh9S16Idc4/LR+7RETERMbCo0jDuw2rGdPFg4+4I2BpnL5lGAnQ4TlYTAJA==
 
 eslint-plugin-cypress@^2.12.1:
   version "2.12.1"

@@ -1,8 +1,8 @@
-import { BaseRemoteClient } from '@/index';
+import { BaseRemoteClient } from '@/base/impl/remote_client_impl';
 import { authToken, DataResponse, ErrorResponse, formatHeader, remoteClientOption, SuccessResponse } from '../setup/client.test.setup';
-import axios, { AxiosInstance, AxiosResponse } from "axios";
-import mockAxios, { getMockAxiosInstances, mockAdapter, mockServer } from '../__mocks__/axios';
-import { Arr } from '@gdknot/frontend_common';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import mockAxios, { getMockAxiosInstances, mockAdapter } from '../__mocks__/axios';
+import { Arr, Completer } from '@gdknot/frontend_common';
 import { AxiosTestHelper } from '../helpers/axo.test.helper';
 
 function wait (span: number): Promise<boolean>{
@@ -41,11 +41,9 @@ describe("Services", ()=>{
     expect((client.client.get as any).mock).not.toBeUndefined();
     //@ts-ignore
     (client.client.get as any).mockResolvedValueOnce((url, config)=>{
-      console.log("mocked get...");
       return Promise.resolve({data: {key: "val"}})
     }); 
 
-    // console.log("client.get path:", path);
     client.get(path, payload);
     expect(client.get).toHaveBeenCalledWith(path, payload);
   });
@@ -63,26 +61,41 @@ describe("Services", ()=>{
   describe("UpdateHeaderPlugin", ()=>{
     test("expect get function being called and headers being updated", async ()=>{
       const url = "/path/to/get";
-      const config = {url};
       const expectedFetched = {
         data: {username: "hello"}
       };
-      const fetched = helper.get(url, {}, ()=>{
-        return expectedFetched;
-      });
-      expect(await fetched).toEqual(expectedFetched);
-      expect(mockAdapter).toBeCalled();
-      const authHeader = {
-        common: {
-          Authorization: authToken
-        }
-      }
-      const lastVal: AxiosResponse = await Arr(mockAdapter.mock.results).last.value;
-      console.log("AxiosConfig:", JSON.stringify(lastVal));
-      expect((lastVal.headers as any).format).toEqual(formatHeader.format);
-      expect((lastVal.headers as any).common.Authorization).toEqual(authHeader.common.Authorization);
+      const mockReturns = expectedFetched;
+      const payload = {}
+      await helper.expectGetPassed(url, payload, mockReturns, expectedFetched, )
     });
+
+    test("modify header force to raise unauthorized",async ()=>{
+      const url = "/path/to/get";
+      const expectedFetched = {
+        data: {username: "hello"}
+      };
+      const mockReturns = {
+        "error_code": 401,
+        "error_key": "Unauthorized",
+        "error_name": "Unauthorized",
+        "message": "Unauthorized",
+      };
+      const payload = {};
+      const completer = new Completer();
+      const wait = (helper.authHeaderUpdater!.process as any as jest.SpyInstance)
+        .withImplementation(
+          (config: AxiosRequestConfig<any>)=>{
+            return config;
+          }, async ()=>{
+            return completer.future;
+          }
+        );
+      await helper.expectGetPassed(url,payload, mockReturns, expectedFetched);
+      completer.complete({});
+      (helper.authHeaderUpdater!.process as any as jest.SpyInstance).withImplementation
+    })
   });
+
 
   describe("AuthGuard", ()=>{
     test("fetch a authorized request expect pass", ()=>{
@@ -95,6 +108,8 @@ describe("Services", ()=>{
     });
   });
 
+
+  
 });
 
 
