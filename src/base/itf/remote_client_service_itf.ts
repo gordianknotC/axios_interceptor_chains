@@ -1,42 +1,43 @@
-import { Queue } from "@gdknot/frontend_common";
-import type { AxiosInstance, AxiosResponse } from "axios";
+import { AsyncQueue } from "@gdknot/frontend_common";
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 export enum EClientStage {
-    idle,
-    fetching,
-    authorizing,
+    idle = "idle",
+    fetching = "fetching",
+    authorizing = "authorizing",
     // success,
     // error
 }
 
-export type DataResponse<T, P=any> = {
-    data: T;
-    pager?: P;
-  };
 
+export type RedirectAction = {
+    clearQueue?: boolean
+}
 export type RemoteClientAuthOption = {
     url: string,
+    baseURL: string,
+    timeout?: number,
     payloadGetter: ()=>any,
     tokenGetter: ()=>any,
     tokenUpdater: (response: AxiosResponse)=>void,
-    redirect?: (response: AxiosResponse)=>void,
+    redirect?: (response: AxiosResponse)=>RedirectAction|undefined|null,
     interval?: number,
 }
   
 
-export abstract class IApiClientMethods<T extends DataResponse<any>, ERROR, SUCCESS> {
+export abstract class IApiClientMethods<DATA , ERROR, SUCCESS> {
     abstract get(
         url: string,
         payload: Record<string, any>
-    ): Promise<T | ERROR>;
+    ): Promise<DATA | ERROR>;
     abstract post(
         url: string,
         payload: Record<string, any>
-    ): Promise<SUCCESS | T  | ERROR>;
+    ): Promise<SUCCESS | DATA  | ERROR>;
     abstract put(
         url: string,
         payload: Record<string, any>
-    ): Promise<SUCCESS | T | ERROR>;
+    ): Promise<SUCCESS | DATA | ERROR>;
     abstract del(
         url: string,
         payload: Record<string, any>
@@ -44,29 +45,30 @@ export abstract class IApiClientMethods<T extends DataResponse<any>, ERROR, SUCC
 }
 
 /**  api client service */
-export abstract class IRemoteClientService<T extends DataResponse<any>, ERROR, SUCCESS>
-    implements IApiClientMethods<T, ERROR, SUCCESS>
+export abstract class IRemoteClientService<DATA , ERROR, SUCCESS>
+    implements IApiClientMethods<DATA, ERROR, SUCCESS>
 {   
-    abstract queue: Queue;
+    abstract queue: AsyncQueue;
     abstract client: AxiosInstance;
     abstract stage: EClientStage;
     abstract authOption: Required<RemoteClientAuthOption>;
-    abstract isDataResponse: (response: T | ERROR | SUCCESS)=> boolean;
-    abstract isErrorResponse: (response: T | ERROR | SUCCESS)=> boolean;
-    abstract isSuccessResponse: (response: T | ERROR | SUCCESS)=> boolean;
+    abstract isDataResponse: (response: DATA | ERROR | SUCCESS)=> boolean;
+    abstract isErrorResponse: (response: DATA | ERROR | SUCCESS)=> boolean;
+    abstract isSuccessResponse: (response: DATA | ERROR | SUCCESS)=> boolean;
     abstract get(
         url: string,
         payload: Record<string, any>
-    ): Promise<T | ERROR>;
-    abstract auth(): Promise<T | ERROR | SUCCESS>;
+    ): Promise<DATA | ERROR>;
+    abstract requestByConfig(option: AxiosRequestConfig): Promise<AxiosResponse>;
+    abstract auth(): Promise<DATA | ERROR | SUCCESS>;
     abstract post(
         url: string,
         payload: Record<string, any>
-    ): Promise<T | ERROR | SUCCESS>;
+    ): Promise<DATA | ERROR | SUCCESS>;
     abstract put(
         url: string,
         payload: Record<string, any>
-    ): Promise<T | ERROR | SUCCESS>;
+    ): Promise<DATA | ERROR | SUCCESS>;
     abstract del(
         url: string,
         payload: Record<string, any>

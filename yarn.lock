@@ -968,10 +968,10 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@gdknot/frontend_common@0.7.32":
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/@gdknot/frontend_common/-/frontend_common-0.7.3.tgz#d88343982621a3f99648abca4b615129f78bfd97"
-  integrity sha512-LboAHEzArFLMMyAHbxaIhNekKrha5fWJX7e3jsqGVY9cV1ysxOEZoYeTfTLb7ydx0E7l9KQJ15ADI68FB6hnEw==
+"@gdknot/frontend_common@0.8.7":
+  version "0.8.7"
+  resolved "https://registry.yarnpkg.com/@gdknot/frontend_common/-/frontend_common-0.8.7.tgz#9fbd6021061b70f6b12abefc377e08d73b4bc9b3"
+  integrity sha512-UyBozLUvJtOzwV736PG4MRgF+EVLSD8WvYPEXi6dW08mgsAmko85ZCxhw8NgHNBgo/rt82sOlMiY8o+ETEvQ3Q==
   dependencies:
     merge-anything "^5.0.4"
 

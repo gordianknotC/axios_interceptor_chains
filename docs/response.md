@@ -62,10 +62,10 @@ const a = injectDependency("a");
 const aOfSource = injectDependency("source.a");
 const b = injectDependency("b");
 const bOfSource = injectDependency("source.b");
-assert(a == 1);
-assert(b == 3);
-assert(aOfSource == 2);
-assert(bOfSource == 4);
+assert(()=>a == 1);
+assert(()=>b == 3);
+assert(()=>aOfSource == 2);
+assert(()=>bOfSource == 4);
 ```
 #### 指定 Ident
 ```ts
@@ -75,10 +75,10 @@ const a = injectDependency("a", "a");
 const aOfSource = injectDependency("source.a", "a");
 const b = injectDependency("b", "a");
 const bOfSource = injectDependency("source.b", "a");
-assert(a == 1);
-assert(b == undefined);
-assert(aOfSource == 2);
-assert(bOfSource == undefined);
+assert(()=>a == 1);
+assert(()=>b == undefined);
+assert(()=>aOfSource == 2);
+assert(()=>bOfSource == undefined);
 
 ```
 
@@ -170,8 +170,8 @@ provideFacade({
     merge
 });
 const facade = injectFacade();
-assert(facade.source.a == undefined);
-assert(facade.source.b == 2);
+assert(()=>facade.source.a == undefined);
+assert(()=>facade.source.b == 2);
 ```
 #### 合併 provide 物件
 
@@ -194,9 +194,9 @@ provideFacade({
     merge
 }
 const facade = injectFacade();
-assert(facade.source.a == 1);
-assert(facade.source.b == 2);
-assert(facade.appended.a == 1);
+assert(()=>facade.source.a == 1);
+assert(()=>facade.source.b == 2);
+assert(()=>facade.appended.a == 1);
 ```
 
 

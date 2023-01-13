@@ -1,5 +1,9 @@
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-import { BaseClientServicesPluginChains } from "./plugin_chains_impl";
+import {
+  BaseClientServicesPluginChains,
+  processRequestFulFill,
+  processRequestReject,
+} from "./plugin_chains_impl";
 
 export type AxiosConfigHeader = {
   common: {
@@ -7,33 +11,26 @@ export type AxiosConfigHeader = {
   };
 };
 
-export abstract class BaseClientServiceRequestPlugin 
-  extends BaseClientServicesPluginChains<AxiosRequestConfig> 
-{
-  constructor(){
+
+export abstract class BaseClientServiceRequestPlugin extends BaseClientServicesPluginChains<AxiosRequestConfig> {
+  constructor() {
     super();
   }
   canGoNext(config: AxiosRequestConfig): boolean {
     return super.canGoNext(config);
   }
-  canProcess(config: AxiosRequestConfig): boolean {
-    return super.canProcess(config);
+  canProcessFulFill(config: AxiosRequestConfig): boolean {
+    return super.canProcessFulFill(config);
   }
-  canProcessError(error: AxiosError<unknown, any>): boolean {
-      return super.canProcessError(error);
-  }
-
-  process(config: AxiosRequestConfig): AxiosRequestConfig {
-    if (this.canGoNext(config) && this.next) {
-      return this.next.process(config);
-    }
-    return config;
+  canProcessReject(error: AxiosError<unknown, any>): boolean {
+    return super.canProcessReject(error);
   }
 
-  processError(error: AxiosError): Promise<AxiosResponse> {
-    if (this.next) {
-      return this.next.processError(error);
-    }
-    return Promise.reject(error.response);
+  processFulFill(config: AxiosRequestConfig): AxiosRequestConfig {
+    return processRequestFulFill(config, this.next);
+  }
+
+  processReject(error: AxiosError): Promise<any> {
+    return processRequestReject(error, this.next);
   }
 }

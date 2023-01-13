@@ -6,7 +6,8 @@
     "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "build:watch": "concurrently --kill-others \"tsc --project tsconfig.build.json && tsc-alias -w -p tsconfig.build.json\"",
     "serve": "vue-cli-service serve",
-    "test": "clear && jest --watch",
+    "test": "jest",
+    "test:watch": "clear & jest --watch",
     "---------- DOC ------------": "",
     "doc": "merge-markdown -m merge_markdown.yml && typedoc src/index.ts",
     "serve:doc": "merge-markdown -m merge_markdown.yml && typedoc src/index.ts && serve docs/build",
@@ -38,13 +39,13 @@
     "jest-mock-axios": "版本不要變，只能用4.5"
   },
   "dependencies": {
-    "@gdknot/frontend_common": "0.7.3",
+    "@gdknot/frontend_common": "0.8.7",
     "axios": "1.2.2",
     "debounce": "^1.2.1",
     "merge-anything": "^5.0.4"
   },
   "peerDependencies": {
-    "@gdknot/frontend_common": "0.7.3",
+    "@gdknot/frontend_common": "0.8.7",
     "merge-anything": "^5.0.4",
     "axios": "1.2.2"
   },

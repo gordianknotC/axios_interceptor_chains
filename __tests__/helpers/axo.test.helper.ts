@@ -1,113 +1,96 @@
 import { BaseRemoteClient } from "@/base/impl/remote_client_impl";
 import { AuthResponseGuard } from "@/presets/auth_response_guard";
-import { UpdateAuthHeaderPlugin, UpdateExtraHeaderPlugin } from "@/presets/header_updater";
-import { authToken, ErrorResponse, formatHeader } from "../setup/client.test.setup";
+import { UpdateAuthHeaderPlugin, UpdateExtraHeaderPlugin } from "@/presets/request_header_updater";
+import { authToken, authUrl, ErrorResponse, formatHeader } from "../setup/client.test.setup";
 import { mockAdapter, mockServer } from "../__mocks__/axios";
 import type {AxiosResponse} from "axios";
 import { Arr } from '@gdknot/frontend_common';
+import { NetworkErrorResponseGuard } from "@/presets/network_error_response_guard";
  
 
 export function wrapImplementation<T extends {}, Key extends keyof T>(
   inst: T, 
   propName: Key, 
-  callback: (origImplResult: any, ...args: any[])=>any
+  newImpl: (origImplResult: any, ...args: any[])=>any
 ){
   const origImplementation = (inst[propName] as Function).bind(inst);
   inst[propName] = (()=>{}) as any;
   jest.spyOn(inst, propName as any)
     .mockImplementation((...args)=>{
-      // console.log("call wrapImplementation:", propName, ...args);
       try{
-        return callback(origImplementation(...args), ...args);
+        return newImpl(origImplementation(...args), ...args);
       }catch(e){
+        console.warn("Exception on wrapImplementation, propName", propName, "inst.name:", inst.constructor.name)
         throw e;
       }
     })
+}
+
+function wrapGuardImpl(plugin: any){
+  if (plugin){
+    wrapImplementation(plugin, "processFulFill", ((origImplResult, config)=>{
+      // console.log(plugin.constructor.name,   "process:", origImplResult);
+      return origImplResult;
+    }));
+    wrapImplementation(plugin, "canProcessFulFill", ((origImplResult, config)=>{
+      // console.log(plugin.constructor.name, " canProcess:", origImplResult);
+      return origImplResult;
+    }));
+    wrapImplementation(plugin, "processReject", ((origImplResult, error)=>{
+      // console.log(plugin.constructor.name, " processError:", origImplResult);
+      return origImplResult;
+    }));
+    wrapImplementation(plugin, "canProcessReject", ((origImplResult, error)=>{
+      // console.log(plugin.constructor.name, " canProcessError:", origImplResult);
+      return origImplResult;
+    }));
+  }
 }
 
 export
 class AxiosTestHelper {
   constructor(
     public client: BaseRemoteClient<any, any, any>,
-    public authHeaderUpdater?: UpdateAuthHeaderPlugin<any, any, any>,
-    public extraHeaderUpdater?: UpdateExtraHeaderPlugin<any, any, any>,
-    public authGuard?: AuthResponseGuard
+    public authToken: string
   ){
     jest.spyOn(client, "get");
     jest.spyOn(client, "put");
     jest.spyOn(client, "post");
 
-    if (authHeaderUpdater){
-      wrapImplementation(authHeaderUpdater, "process", ((origImplResult, config)=>{
-        // console.log("authHeaderUpdater process:", origImplResult);
-        return origImplResult;
-      }));
-      wrapImplementation(authHeaderUpdater, "canProcess", ((origImplResult, config)=>{
-        // console.log("authHeaderUpdater canProcess:", origImplResult);
-        return origImplResult;
-      }));
-    }
-    
-    if (authHeaderUpdater){
-      wrapImplementation(authHeaderUpdater, "processError", ((origImplResult, error)=>{
-        // console.log("authHeaderUpdater processError:", origImplResult);
-        return origImplResult;
-      }));
-      wrapImplementation(authHeaderUpdater, "canProcessError", ((origImplResult, error)=>{
-        // console.log("authHeaderUpdater canProcessError:", origImplResult);
-        return origImplResult;
-      }));
-    }
-    
-    if (extraHeaderUpdater){
-      wrapImplementation(extraHeaderUpdater, "process", ((origImplResult, config)=>{
-        // console.log("extraHeaderUpdater process:", origImplResult);
-        return origImplResult;
-      }));
-      wrapImplementation(extraHeaderUpdater, "canProcess", ((origImplResult, config)=>{
-        // console.log("extraHeaderUpdater canProcess:", origImplResult);
-        return origImplResult;
-      }));
-      wrapImplementation(extraHeaderUpdater, "processError", ((origImplResult, error)=>{
-        // console.log("extraHeaderUpdater processError:", origImplResult);
-        return origImplResult;
-      }));
-      wrapImplementation(extraHeaderUpdater, "canProcessError", ((origImplResult, error)=>{
-        // console.log("extraHeaderUpdater canProcessError:", origImplResult);
-        return origImplResult;
-      }));
-    }
-    
-    if (authGuard){
-      wrapImplementation(authGuard, "process", ((origImplResult, response)=>{
-        // console.log("authGuard process:", origImplResult);
-        return origImplResult;
-      }));  
-      wrapImplementation(authGuard, "canProcess", ((origImplResult, response)=>{
-        // console.log("authGuard canProcess:", origImplResult);
-        return origImplResult;
-      }));
-      wrapImplementation(authGuard, "processError", ((origImplResult, error)=>{
-        // console.log("authGuard processError:", origImplResult);
-        return origImplResult;
-      }));  
-      wrapImplementation(authGuard, "canProcessError", ((origImplResult, error)=>{
-        // console.log("authGuard canProcessError:", origImplResult);
-        return origImplResult;
-      }));
-    }
+    client.requestChain.forEach((guard)=>{
+      wrapGuardImpl(guard);
+    });
+
+    client.responseChain.forEach((guard)=>{
+      wrapGuardImpl(guard);
+    });
+  }
+  get authGuard(){
+    return Arr(this.client.responseChain).firstWhere((_)=>_.constructor.name == AuthResponseGuard.name);
+  }
+  get networkErrorGuard(){
+    return Arr(this.client.responseChain).firstWhere((_)=>_.constructor.name == NetworkErrorResponseGuard.name);
+  }
+  get authHeaderUpdater(){
+    return Arr(this.client.requestChain).firstWhere((_)=>_.constructor.name == UpdateAuthHeaderPlugin.name);
+  }
+  get extraHeaderUpdater(){
+    return Arr(this.client.requestChain).firstWhere((_)=>_.constructor.name == UpdateExtraHeaderPlugin.name);
   }
 
+
   get(url: string, payload: any, result: ()=>any){
-    try{
-      const _url = (new URL(url, 'http://localhost'))
-      _url.search = new URLSearchParams(payload).toString();
-      mockServer.registerResponse(url, result());
-      return this.client.get(url, payload);
-    }catch(e){
-      console.error(e);
-      throw e;
-    }
+    const _url = (new URL(url, 'http://localhost'))
+    _url.search = new URLSearchParams(payload).toString();
+    mockServer.registerResponse(url, result());
+    return this.client.get(url, payload);
+  }
+  auth(result: ()=>any, useValidator: boolean = false){
+    const url = this.client.authOption.url;
+    const _rawUrl = (new URL(url, 'http://localhost'))
+    _rawUrl.search = new URLSearchParams(this.client.authOption.payloadGetter()).toString();
+    mockServer.registerResponse(url, result(), useValidator);
+    return this.client.auth();
   }
   put(url: string, data: any, result: ()=>any){
     const _url = (new URL(url, 'http://localhost'))
@@ -128,29 +111,45 @@ class AxiosTestHelper {
     return this.client.del(url, data);
   }
 
+  async expectUnauthorized(url: string, payload: any, mockReturns: any, expectedFetched: any){
+    authToken.value = "hot!!";
+    mockServer.registerResponse(authUrl, {data: {
+      token: this.authToken
+    }}, false);
+    const fetched = await this.get(url, payload, ()=>{
+      return mockReturns;
+    });
+    expect(mockAdapter, "Adapter should be called").toBeCalled();
+    const authHeader = {
+        Authorization: authToken.value
+    }
+    const lastVal: AxiosResponse = await Arr(mockAdapter.mock.results).last.value;
+    const headerInConfig = (lastVal.config.headers as any);
+    const tokenInHeader = (lastVal.config.headers as any).Authorization;
+    expect(tokenInHeader == authToken.value, `tokenInHeader:${tokenInHeader} != ${authToken.value}`).toBeTruthy();
+    // expect(this.client.isErrorResponse(fetched)).toBeTruthy();
+    // expect((fetched as ErrorResponse).message).toBe("Unauthorized");
+    // expect((lastVal.headers as any).format).toEqual(formatHeader.value.format);
+    expect(headerInConfig.Authorization, "header in config not updated properly").toEqual(authHeader.Authorization);
+    expect(this.authGuard!.canProcessReject, "expect canProcessReject called").toBeCalled();
+    expect(this.authGuard!.canProcessFulFill, "expect canProcessFulFill called").toBeCalled();
+    return Promise.resolve({});
+  }
+
   async expectGetPassed(url: string, payload: any, mockReturns: any, expectedFetched: any){
     const fetched = await this.get(url, payload, ()=>{
       return mockReturns;
     });
-
     expect(mockAdapter).toBeCalled();
     const authHeader = {
         Authorization: authToken.value
     }
     const lastVal: AxiosResponse = await Arr(mockAdapter.mock.results).last.value;
-    const tokenInHeader = (lastVal.headers as any).Authorization;
-    
-    console.log("authToken:", authToken.value, "tokenInHeader:", tokenInHeader, "mockAdapter.mock.results:", mockAdapter.mock.results.length, mockAdapter.mock)
-
-    if (tokenInHeader == authToken.value){
-      expect(fetched).toEqual(expectedFetched);
-      expect((lastVal.headers as any).format).toEqual(formatHeader.value.format);
-      expect((lastVal.headers as any).Authorization).toEqual(authHeader.Authorization);
-    }else{
-      expect(this.client.isErrorResponse(fetched)).toBeTruthy();
-      expect((fetched as ErrorResponse).message).toBe("Unauthorized");
-      //expect((lastVal.headers as any).format).toEqual(formatHeader.value.format);
-      expect((lastVal.headers as any).Authorization).not.toEqual(authHeader.Authorization);
-    }
+    const headerInConfig = (lastVal.config.headers as any);
+    const tokenInHeader = (lastVal.config.headers as any).Authorization;
+    expect(tokenInHeader == authToken.value, `tokenInHeader:${tokenInHeader} != ${authToken.value}`).toBeTruthy();
+    expect(fetched).toEqual(expectedFetched);
+    expect(headerInConfig.format).toEqual(formatHeader.value.format);
+    expect(headerInConfig.Authorization).toEqual(authHeader.Authorization);
   }
 }
