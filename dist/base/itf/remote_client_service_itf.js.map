@@ -1,0 +1,1 @@
+{"version":3,"file":"remote_client_service_itf.js","sourceRoot":"","sources":["../../../src/base/itf/remote_client_service_itf.ts"],"names":[],"mappings":"AAGA,MAAM,CAAN,IAAY,YAMX;AAND,WAAY,YAAY;IACpB,6BAAa,CAAA;IACb,qCAAqB,CAAA;IACrB,2CAA2B,CAAA;IAC3B,WAAW;IACX,QAAQ;AACZ,CAAC,EANW,YAAY,KAAZ,YAAY,QAMvB;AAkBD,MAAM,OAAgB,iBAAiB;CAiBtC;AAED,0BAA0B;AAC1B,MAAM,OAAgB,oBAAoB;CA4BzC"}

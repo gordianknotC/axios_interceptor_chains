@@ -1,5 +1,5 @@
-import { BaseRemoteClient } from '@/base/impl/remote_client_impl';
-import { authToken, authUrl, DataResponse, ErrorResponse, formatHeader, remoteClientOption, SuccessResponse } from '../setup/client.test.setup';
+import { BaseClient } from '@/base/impl/client_impl';
+import { authToken, authUrl, DataResponse, ErrorResponse, formatHeader, requestClientOption, SuccessResponse } from '../setup/client.test.setup';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import mockAxios, { getMockAxiosInstances, mockAdapter, mockServer } from '../__mocks__/axios';
 import { Arr, Completer } from '@gdknot/frontend_common';
@@ -19,13 +19,13 @@ function time(): number{
  
 describe("Services", ()=>{
   const preRenderedAuthToken = authToken.value;
-  let client: BaseRemoteClient<DataResponse<any>, ErrorResponse, SuccessResponse>;
+  let client: BaseClient<DataResponse<any>, ErrorResponse, SuccessResponse>;
   let instances: jest.Mocked<AxiosInstance>[];
   let axiosInstance: jest.Mocked<AxiosInstance>;
   let helper: AxiosTestHelper;
   beforeEach(()=>{
     mockAxios;
-    client = new BaseRemoteClient(remoteClientOption);
+    client = new BaseClient(requestClientOption);
     helper = new AxiosTestHelper(client, authToken.value);
     instances = getMockAxiosInstances();
     axiosInstance = Arr(instances).last;
@@ -155,8 +155,9 @@ describe("Services", ()=>{
       expect(mockAdapter).toBeCalled();
       expect(fetched).toEqual(expectedFetched);
     });
-
   });
+
+  
   describe("AuthGuard", ()=>{
     test("fetch a authorized request expect pass", ()=>{
       expect(true).toBeTruthy();

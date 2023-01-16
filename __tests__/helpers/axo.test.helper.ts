@@ -1,4 +1,4 @@
-import { BaseRemoteClient } from "@/base/impl/remote_client_impl";
+import { BaseClient } from "@/base/impl/client_impl";
 import { AuthResponseGuard } from "@/presets/auth_response_guard";
 import { UpdateAuthHeaderPlugin, UpdateExtraHeaderPlugin } from "@/presets/request_header_updater";
 import { authToken, authUrl, ErrorResponse, formatHeader } from "../setup/client.test.setup";
@@ -50,7 +50,7 @@ function wrapGuardImpl(plugin: any){
 export
 class AxiosTestHelper {
   constructor(
-    public client: BaseRemoteClient<any, any, any>,
+    public client: BaseClient<any, any, any>,
     public authToken: string
   ){
     jest.spyOn(client, "get");
@@ -86,9 +86,9 @@ class AxiosTestHelper {
     return this.client.get(url, payload);
   }
   auth(result: ()=>any, useValidator: boolean = false){
-    const url = this.client.authOption.url;
+    const url = this.client.option.authOption!.url!;
     const _rawUrl = (new URL(url, 'http://localhost'))
-    _rawUrl.search = new URLSearchParams(this.client.authOption.payloadGetter()).toString();
+    _rawUrl.search = new URLSearchParams(this.client.option.authOption!.payloadGetter()).toString();
     mockServer.registerResponse(url, result(), useValidator);
     return this.client.auth();
   }

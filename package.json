@@ -1,5 +1,5 @@
 {
-  "name": "@gdknot/axios_interceptor_chains",
+  "name": "@gdknot/request_client",
   "version": "0.0.1",
   "description": "interceptor chains for axios",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "jest",
     "test:watch": "clear & jest --watch",
     "---------- DOC ------------": "",
-    "doc": "merge-markdown -m merge_markdown.yml && typedoc src/index.ts",
+    "doc": "yarn build && merge-markdown -m merge_markdown.yml && typedoc src/index.ts",
     "serve:doc": "merge-markdown -m merge_markdown.yml && typedoc src/index.ts && serve docs/build",
     "---------- NPM ------------": "",
     "login": "npm login",
@@ -39,13 +39,13 @@
     "jest-mock-axios": "版本不要變，只能用4.5"
   },
   "dependencies": {
-    "@gdknot/frontend_common": "0.8.7",
+    "@gdknot/frontend_common": "0.9.3",
     "axios": "1.2.2",
     "debounce": "^1.2.1",
     "merge-anything": "^5.0.4"
   },
   "peerDependencies": {
-    "@gdknot/frontend_common": "0.8.7",
+    "@gdknot/frontend_common": "0.9.3",
     "merge-anything": "^5.0.4",
     "axios": "1.2.2"
   },

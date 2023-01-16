@@ -1,7 +1,8 @@
 import { ensureCanProcessFulFill, ensureCanReject } from "@/utils/common_utils";
 import { assert, AssertMsg } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse, AxiosResponseHeaders } from "axios";
-import type { IRemoteClientService,  } from "../itf/remote_client_service_itf";
+import { AnyMxRecord } from "dns";
+import type { ClientAuthOption, ClientOption, IBaseAuthClient, IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain,  } from "./client_itf"
 
 export interface ResponseInterceptorUse<V> {
     onFulfilled?: ((value: V) => V | Promise<V>) | null, 
@@ -10,10 +11,13 @@ export interface ResponseInterceptorUse<V> {
 
 const byPassAll = false;
 
-
+//
+//    R E S P O N S E 
+//
+//
 export function processResponseFulFill(
   response: AxiosResponse,
-  chain?: BaseClientServicesPluginChains<any>
+  chain?: BaseClientServicesPluginChains<any, any, any>
 ): Promise<AxiosResponse> {
   if (!chain) return Promise.resolve(response);
   if (ensureCanProcessFulFill(() => chain.canProcessFulFill(response))) {
@@ -28,7 +32,7 @@ export function processResponseFulFill(
 
 export function processResponseReject(
   error: AxiosError,
-  chain?: BaseClientServicesPluginChains<any>
+  chain?: BaseClientServicesPluginChains<any, any, any>
 ): Promise<AxiosError | AxiosResponse> {
   if (!chain) return Promise.reject(error!);
   if (ensureCanReject(() => chain.canProcessReject(error))) {
@@ -41,12 +45,28 @@ export function processResponseReject(
   }
 }
 
+function onResponseFulFilled(chain: BaseClientServicesPluginChains<any, any, any>){
+  return (response: AxiosResponse): Promise<AxiosResponse> => {
+    if (byPassAll) return Promise.resolve(response);
+    return processResponseFulFill(response, chain);
+  }
+}
+function onResponseError(chain: BaseClientServicesPluginChains<any, any, any>){
+  return (error: AxiosError)=>{
+    if (byPassAll) return Promise.reject(error.response);
+    return processResponseReject(error, chain);
+  }
+}
 
-
-
+//
+//
+//       R E Q U E S T
+//
+//
+//
 export function processRequestFulFill(
   config: AxiosRequestConfig,
-  chain?: BaseClientServicesPluginChains<any>
+  chain?: BaseClientServicesPluginChains<any, any, any>
 ): AxiosRequestConfig {
   if (!chain) return config;
   if (ensureCanProcessFulFill(() => chain.canProcessFulFill(config))) {
@@ -60,7 +80,7 @@ export function processRequestFulFill(
 
 export function processRequestReject(
   error: AxiosError,
-  chain?: BaseClientServicesPluginChains<any>
+  chain?: BaseClientServicesPluginChains<any, any, any>
 ): Promise<AxiosError | AxiosResponse> {
   if (!chain) return Promise.reject(error!);
   if (ensureCanReject(() => chain.canProcessReject(error))) {
@@ -75,40 +95,47 @@ export function processRequestReject(
   }
 }
 
-function onRequestFulFilled(chain: BaseClientServicesPluginChains<any>){
+function onRequestFulFilled(chain: BaseClientServicesPluginChains<any, any, any>){
   return (config: AxiosRequestConfig): AxiosRequestConfig=>{
     if (byPassAll) return config;
     return processRequestFulFill(config, chain);
   }
 }
-function onRequestError(chain: BaseClientServicesPluginChains<any>){
+function onRequestError(chain: BaseClientServicesPluginChains<any, any, any>){
   return (error: AxiosError): Promise<AxiosResponse|AxiosError>=>{
     if (byPassAll) return Promise.reject(error.response);
     return processRequestReject(error, chain);
   }
 }
-function onResponseFulFilled(chain: BaseClientServicesPluginChains<any>){
-  return (response: AxiosResponse): Promise<AxiosResponse> => {
-    if (byPassAll) return Promise.resolve(response);
-    return processResponseFulFill(response, chain);
-  }
-}
-function onResponseError(chain: BaseClientServicesPluginChains<any>){
-  return (error: AxiosError)=>{
-    if (byPassAll) return Promise.reject(error.response);
-    return processResponseReject(error, chain);
-  }
-}
 
 
 /**
+ * {@inheritdoc BaseClientServicesPluginChains}
  * @typeParam INPUT -  process function 的輸入型別
  * @typeParam OUTPUT - process function 的輸出型別
+ * @typeParam CLIENT - client 型別
  */
-export abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INPUT> {
-  static install(
-    chain: BaseClientServicesPluginChains<any>[], 
-    client: IRemoteClientService<any, any, any>,
+export abstract class BaseClientServicesPluginChains<
+  INPUT, 
+  OUTPUT = INPUT, 
+  CLIENT extends (IBaseClientResponsibilityChain & IBaseClientProperties<any>)
+    =IBaseClient<any, any, any>
+> {
+  /** instal request/response responsibility chain
+   * @see {@link BaseClient}
+   * @example - 於 BaseClient 內部
+   * ```ts 
+     if (is.not.empty(requestChain)){
+        BaseClientServicesPluginChains.install(requestChain, this, "request");
+     }
+     if (is.not.empty(responseChain)){
+        BaseClientServicesPluginChains.install(responseChain, this, "response");
+     }
+   * ```
+   */
+  static install<CLIENT extends IBaseClientResponsibilityChain & IBaseClientProperties<any>>(
+    chain: BaseClientServicesPluginChains<any, any, any>[], 
+    client: CLIENT,
     interceptors: "response" | "request"
   ){
     assert(()=>chain.length >= 1);
@@ -119,24 +146,28 @@ export abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INPUT> {
       masterChain.addAll(tail)
     }
     if (interceptors == "response"){
-      client.client.interceptors.response.use(
+      client.axios.interceptors.response.use(
         onResponseFulFilled(masterChain as any),
         onResponseError(masterChain)
       )
     }else{
-      client.client.interceptors.request.use(
+      client.axios.interceptors.request.use(
         onRequestFulFilled(masterChain),
         onRequestError(masterChain)
       )
     }
   }
   constructor(){}
-  abstract prev?: BaseClientServicesPluginChains<INPUT, OUTPUT>;
-  abstract next?: BaseClientServicesPluginChains<INPUT, OUTPUT>;
-  abstract client?: IRemoteClientService<any, any, any>;
+  /** 上一個 chain */
+  abstract prev?: BaseClientServicesPluginChains<INPUT, OUTPUT, CLIENT>;
+  /** 下一個 chain */
+  abstract next?: BaseClientServicesPluginChains<INPUT, OUTPUT, CLIENT>;
+  /** ClientService */
+  abstract client?: CLIENT;
   abstract processFulFill(config: INPUT): OUTPUT;
   abstract processReject(error: AxiosError): Promise<AxiosError|AxiosResponse>;
-  protected addNext(next: BaseClientServicesPluginChains<INPUT, OUTPUT>) {
+  /** 增加下一個 chain */
+  protected addNext(next: BaseClientServicesPluginChains<INPUT, OUTPUT, CLIENT>) {
     assert(
       () => this.client != undefined,
       "undefined client"
@@ -145,7 +176,8 @@ export abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INPUT> {
     next.prev = this;
     next.init(this.client!);
   }
-  protected addPrev(prev: BaseClientServicesPluginChains<INPUT, OUTPUT>) {
+  /** 增加上一個 chain */
+  protected addPrev(prev: BaseClientServicesPluginChains<INPUT, OUTPUT, CLIENT>) {
     assert(
       () => this.client != undefined,
       "undefined client"
@@ -154,7 +186,8 @@ export abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INPUT> {
     prev.next = this;
     prev.init(this.client!);
   }
-  addAll(_all: BaseClientServicesPluginChains<INPUT, OUTPUT>[]) {
+  
+  addAll(_all: BaseClientServicesPluginChains<INPUT, OUTPUT, CLIENT>[]) {
     assert(
       () => this.client != undefined,
       "undefined client"
@@ -175,11 +208,11 @@ export abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INPUT> {
   public canProcessFulFill(config: INPUT): boolean {
     return true;
   }
-  /** default: false */
+  /** default: true */
   public canProcessReject(error: AxiosError): boolean {
-    return false;
+    return true;
   }
-  init(client: IRemoteClientService<any, any, any>) {
+  init(client: CLIENT) {
     this.client = client;
   }
 }

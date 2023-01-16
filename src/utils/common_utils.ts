@@ -1,5 +1,4 @@
 import { AllowedModule } from "@gdknot/frontend_common";
-import { AllowedLogger } from "@gdknot/frontend_common/dist/utils/logger";
 
 export function wait (span: number): Promise<boolean>{
     return new Promise(resolve =>{

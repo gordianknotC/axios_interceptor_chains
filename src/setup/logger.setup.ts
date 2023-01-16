@@ -1,5 +1,6 @@
+import { LazyHolder, Logger } from "@gdknot/frontend_common";
 import { _currentEnv } from "@gdknot/frontend_common/dist/extension/extension_setup";
-import { AllowedLogger, AllowedModule, Logger } from "@gdknot/frontend_common/dist/utils/logger"
+import { AllowedModule,  } from "@gdknot/frontend_common/dist/utils/logger.types"
 
 export enum EModules {
   Client="Client",
@@ -8,20 +9,23 @@ export enum EModules {
   HeaderUpdater="HeaderUpdater",
 }
 
+export function logger(module: AllowedModule<EModules>): Logger<EModules>{
+  return LazyHolder(()=>new Logger(module));
+}
+ 
 const ClientModule: AllowedModule<EModules> = {
   moduleName: EModules.Client,
-  disallowedHandler: (level)=> false
+  disallowedHandler: (level)=> false,
 }
 
-export
-const LogModules: AllowedLogger<EModules> = {
-  [EModules.Client]: ClientModule,
-  [EModules.AuthGuard]: {...ClientModule, moduleName: EModules.AuthGuard},
-  [EModules.RequestRep]: {...ClientModule, moduleName: EModules.RequestRep},
-  [EModules.HeaderUpdater]: {...ClientModule, moduleName: EModules.HeaderUpdater},
-}
-  
-Logger.setLoggerAllowanceByEnv({
-  test: LogModules,
-  develop: LogModules
+const modules = [
+  ClientModule,
+  {...ClientModule, moduleName: EModules.AuthGuard},
+  {...ClientModule, moduleName: EModules.RequestRep},
+  {...ClientModule, moduleName: EModules.HeaderUpdater}
+];
+
+export const LogModules = Logger.setLoggerAllowanceByEnv({
+  test: modules,
+  develop: []
 })

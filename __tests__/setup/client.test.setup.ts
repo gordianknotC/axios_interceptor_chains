@@ -2,16 +2,16 @@ import {
   UpdateAuthHeaderPlugin,
   UpdateExtraHeaderPlugin,
 } from "@/presets/request_header_updater";
-import { AuthResponseGuard } from "@/presets/auth_response_guard";
+import { AuthResponseGuard, AuthResponseGuardForAuthClient } from "@/presets/auth_response_guard";
 import { NetworkErrorResponseGuard } from "@/presets/network_error_response_guard";
-import { AxiosHeaders, AxiosResponse } from "axios";
-import { RemoteClientOption } from "@/base/impl/remote_client_impl";
-import { RedirectAction } from "@/base/itf/remote_client_service_itf";
+import { AxiosResponse } from "axios";
+import { ClientOption } from "@/base/itf/client_itf";
 import { RequestReplacer } from "@/presets/request_replacer";
-import { assert } from "@gdknot/frontend_common";
 
 
-export type DataResponse<T> = { data: T; pager: any };
+export type DataResponse<T> = { 
+  data: T; pager: any
+ };
 export type ErrorResponse = {
   error_key: string;
   error_code: string;
@@ -30,16 +30,15 @@ export const authToken = { value: "I'M Auth Token" };
 export const formatHeader = { value: { format: "mock" } };
 export const authUrl = "path/to/auth_url";
 
-console.log("UpdateAuthHeaderPlugin:", UpdateAuthHeaderPlugin);
-export const remoteClientOption: RemoteClientOption<
+export const requestClientOption: ClientOption<
   DataResponse<any>,
   ErrorResponse,
   SuccessResponse
 > = {
-  isSuccessResponse: (s) => (s as SuccessResponse).succeed != undefined,
-  isDataResponse: (d) => (d as DataResponse<any>).data != undefined,
-  isErrorResponse: (e) => (e as ErrorResponse).error_code != undefined,
-  config: {
+  isSuccessResponse: (s: any) => (s as SuccessResponse).succeed != undefined,
+  isDataResponse: (d: any) => (d as DataResponse<any>).data != undefined,
+  isErrorResponse: (e: any) => (e as ErrorResponse).error_code != undefined,
+  axiosConfig: {
     baseURL,
     timeout,
   },
@@ -51,6 +50,7 @@ export const remoteClientOption: RemoteClientOption<
       return formatHeader.value;
     }),
     new RequestReplacer(),
+    
   ],
   responseChain: [
     new AuthResponseGuard(),
@@ -59,10 +59,16 @@ export const remoteClientOption: RemoteClientOption<
     }),
   ],
   authOption: {
-    url: authUrl,
-    baseURL,
-    timeout: 12000,
+    axiosConfig: {
+      url: authUrl,
+      baseURL,
+      timeout: 12000,
+    },
     interval: 600,
+    requestChain: [],
+    responseChain: [
+      new AuthResponseGuardForAuthClient()
+    ],
     payloadGetter: function () {
       return null;
     },
@@ -79,6 +85,3 @@ export const remoteClientOption: RemoteClientOption<
     },
   },
 };
-
-assert(()=>remoteClientOption.requestChain.length == 3, "Uncaught error");
-assert(()=>remoteClientOption.responseChain.length == 2, "Uncaught error");

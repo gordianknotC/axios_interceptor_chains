@@ -1,20 +1,31 @@
-import { BaseClientServicesPluginChains } from "@/base/impl/plugin_chains_impl";
+import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
 import { BaseClientServiceRequestPlugin } from "@/base/impl/request_plugins_impl";
-import {
-  IRemoteClientService,
-} from "@/base/itf/remote_client_service_itf";
+import { IBaseClient } from "@/base/itf/client_itf";
 import { NotImplementedError } from "@gdknot/frontend_common";
 import { AxiosError, AxiosRequestConfig, AxiosHeaders } from "axios";
 
-export type AxiosHeaderValue = AxiosHeaders | string | string[] | number | boolean | null;
+export type AxiosHeaderValue =
+  | AxiosHeaders
+  | string
+  | string[]
+  | number
+  | boolean
+  | null;
+
+/** Axios 所定義，為單層物件, 複雜物件可能要轉 JSONString */
 export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;
 
+/**  
+ * @typeParam RESPONSE - response 型別
+ * @typeParam ERROR - error 型別
+ * @typeParam SUCCESS - success 型別
+*/
 export class BaseRequestGuard<
-  RESPONSE ,
+  RESPONSE,
   ERROR,
   SUCCESS
 > extends BaseClientServiceRequestPlugin {
-  client?: IRemoteClientService<RESPONSE, ERROR, SUCCESS>;
+  client?: IBaseClient<RESPONSE, ERROR, SUCCESS>;
   prev?: BaseClientServicesPluginChains<
     AxiosRequestConfig<any>,
     AxiosRequestConfig<any>
@@ -25,38 +36,36 @@ export class BaseRequestGuard<
   >;
   _enabled: boolean = true;
 
-  constructor(){
+  constructor() {
     super();
   }
-  enable(){
+  enable() {
     this._enabled = true;
   }
-  disable(){
+  disable() {
     this._enabled = false;
   }
   canProcessFulFill(config: AxiosRequestConfig<any>): boolean {
-    if (!this._enabled)
-      return false;
+    if (!this._enabled) return false;
     return super.canProcessFulFill(config);
   }
   canProcessReject(error: AxiosError<unknown, any>): boolean {
-    if (!this._enabled)
-      return false
+    if (!this._enabled) return false;
     return super.canProcessReject(error);
   }
 }
 
-/** 用來 UpdateRequest Configuration */
+/** 用來更新 AxiosRequestConfig 
+ * @typeParam RESPONSE - response 型別
+ * @typeParam ERROR - error 型別
+ * @typeParam SUCCESS - success 型別
+*/
 export class BaseRequestHeaderGuard<
-  RESPONSE ,
-  ERROR,
-  SUCCESS
-> extends BaseRequestGuard<
   RESPONSE,
   ERROR,
   SUCCESS
-> {
-  constructor(){
+> extends BaseRequestGuard<RESPONSE, ERROR, SUCCESS> {
+  constructor() {
     super();
   }
   protected appendRequestHeader(): RawAxiosHeaders {

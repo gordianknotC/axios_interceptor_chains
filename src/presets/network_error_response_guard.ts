@@ -1,13 +1,16 @@
-import { BaseClientServicesPluginChains } from "@/base/impl/plugin_chains_impl";
+import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
 import { BaseClientServiceResponsePlugin } from "@/base/impl/response_plugins_impl";
-import { IRemoteClientService } from "@/base/itf/remote_client_service_itf";
+import { IBaseClient } from "@/base/itf/client_itf";
 import { AxiosError, AxiosResponse } from "axios";
 
 
-
+/** 
+ * {@inheritdoc BaseClientServiceResponsePlugin} 
+ * 用來攔截 Network Error
+ * */
 export class NetworkErrorResponseGuard
   extends BaseClientServiceResponsePlugin {
-  client?: IRemoteClientService<any, any, any>;
+  client?: IBaseClient<any, any, any>;
   prev?: BaseClientServicesPluginChains<
     AxiosResponse, Promise<AxiosResponse>
   >;
@@ -17,16 +20,13 @@ export class NetworkErrorResponseGuard
   constructor(public networkErrorHandler: (error: AxiosError) => void) {
     super();
   }
-
-  //
-  //  processFulFill
-  //
   canProcessFulFill(config: AxiosResponse<any, any>): boolean {
     return false;
   }
-  //
-  //  process error
-  //
+  /**
+   * @extendSummary - 
+   * 這裡只查找 error.message.toLowerCase() == "network error" 者, 若成立則 {@link processReject}
+   */
   canProcessReject(error: AxiosError<unknown, any>): boolean {
     try {
       return error.message.toLowerCase() == "network error";
@@ -35,6 +35,11 @@ export class NetworkErrorResponseGuard
       return false;
     }
   }
+
+  /**
+   * @extendSummary - 
+   * 執行 {@link networkErrorHandler} 並繼續 responsibility chain
+   */
   processReject(error: AxiosError<unknown, any>): Promise<any> {
     this.networkErrorHandler(error);
     return super.processReject(error);

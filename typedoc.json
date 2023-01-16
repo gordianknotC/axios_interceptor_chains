@@ -29,14 +29,18 @@
             {
                 "title": "Axios Interceptor Plugins",
                 "source": "readme.md",
+            }, 
+            {
+                "title": "Request/Response Chain",
+                "source": "chains.md",
             },
             {
-                "title": "Request Plugins",
-                "source": "request.md",
+                "title": "Frontend Client",
+                "source": "client.md",
             },
             {
-                "title": "Response Plugins",
-                "source": "response.md",
+                "title": "Mocking Axios",
+                "source": "mocking.md",
             },
         ]
     }

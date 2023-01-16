@@ -1,29 +1,34 @@
 //
-//  INTERFACES
-
 //
-export type { IApiClientMethods } from "./base/itf/remote_client_service_itf";
+//  INTERFACES
+//
+//
+export type { IBaseClientMethods as IApiClientMethods } from "./base/itf/client_itf";
 export type { AxiosConfigHeader } from "./base/impl/request_plugins_impl";
 export {
   EClientStage,
-  IRemoteClientService,
-} from "./base/itf/remote_client_service_itf";
+} from "./base/itf/client_itf";
 
-export type { RemoteClientOption } from "./base/impl/remote_client_impl";
+export type {
+  IBaseClient as IClientService,
+  ClientOption
+} from "./base/itf/client_itf";
+//
 //
 //  BASE IMPLEMENTATION
 //
-export { BaseClientServicesPluginChains } from "./base/impl/plugin_chains_impl";
+//
+export { BaseClientServicesPluginChains } from "./base/itf/plugin_chains_itf";
 export { BaseClientServiceRequestPlugin } from "./base/impl/request_plugins_impl";
-export { BaseRemoteClient } from "./base/impl/remote_client_impl";
+export { BaseClient as BaseClient } from "./base/impl/client_impl";
 export { BaseClientServiceResponsePlugin } from "./base/impl/response_plugins_impl";
-
-
+export { BaseAuthResponseGuard } from "./base/impl/base_auth_response_guard_impl";
 export { BaseRequestReplacer } from "./base/impl/base_request_replacer_impl";
-export { BaseRequestHeaderGuard } from "./base/impl/base_request_header_updater_impl";
-
+export { BaseRequestHeaderGuard } from "./base/impl/base_request_guard_impl";
+//
 //
 //  PRESETS
+//
 //
 export {
   UpdateAuthHeaderPlugin,
@@ -31,4 +36,5 @@ export {
 } from "./presets/request_header_updater";
 
 export { AuthResponseGuard } from "./presets/auth_response_guard";
+export { RequestReplacer } from "./presets/request_replacer";
 

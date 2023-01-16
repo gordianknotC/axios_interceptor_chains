@@ -1,5 +1,5 @@
-import { EClientStage, IRemoteClientService, RemoteClientAuthOption } from "../itf/remote_client_service_itf";
-import { BaseClientServicesPluginChains } from "./plugin_chains_impl";
+import { EClientStage, IBaseClient as IBaseClient, ClientAuthOption, ClientOption, QueueRequest, IBaseAuthClient } from "../itf/client_itf";
+import { BaseClientServicesPluginChains } from "../itf/plugin_chains_itf";
 import { AxiosError, AxiosHeaders, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import { is, Obj, Queue, assert, AsyncQueue, Logger } from "@gdknot/frontend_common";
@@ -7,100 +7,99 @@ import debounce from "debounce";
 import { RawAxiosHeaders } from "@/presets/request_header_updater";
 import { timeStamp } from "console";
 import { LogModules } from "@/setup/logger.setup";
+import { BaseAuthClient } from "./auth_client_impl";
 
 const D = new Logger(LogModules.Client) 
 
-export type RemoteClientOption<DATA, ERROR, SUCCESS> = {
-  config: AxiosRequestConfig,
-  requestChain: BaseClientServicesPluginChains<AxiosRequestConfig>[] ,
-  responseChain: BaseClientServicesPluginChains<
-    AxiosResponse,
-    Promise<AxiosResponse>
-  >[] ,
-  authOption: RemoteClientAuthOption,
-  isErrorResponse: (error: ERROR|SUCCESS|DATA)=>boolean,
-  isSuccessResponse: (success: ERROR|SUCCESS|DATA)=>boolean,
-  isDataResponse: (data: ERROR|SUCCESS|DATA)=>boolean,
+export
+const DEFAULT_CLIENT_OPTION: Partial<ClientAuthOption> = {
+  interval: 600,
+  url: "", 
+  payloadGetter: (()=>{}),
+  tokenGetter: (()=>""),
+  tokenUpdater: ((response)=>{}),
+  redirect: ((response)=>{
+    return {clearQueue: true}
+  }),
 };
 
-export class BaseRemoteClient<DATA , ERROR, SUCCESS> 
-  implements IRemoteClientService<DATA, ERROR, SUCCESS> 
+/** {@inheritdoc IClientService} 
+* 
+* @typeParam DATA - response 型別
+* @typeParam ERROR - error 型別
+* @typeParam SUCCESS - success 型別
+*/
+export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = QueueRequest> 
+  implements IBaseClient<DATA, ERROR, SUCCESS, QUEUE> 
 {
-  queue: AsyncQueue;
-  client: AxiosInstance;
-  authOption: Required<RemoteClientAuthOption>;
+  queue: AsyncQueue<QUEUE>;
+  axios: AxiosInstance;
   requestChain: BaseClientServicesPluginChains<AxiosRequestConfig>[];
   responseChain: BaseClientServicesPluginChains<
     AxiosResponse,
     Promise<AxiosResponse>
   >[];
-  private _authClient: AxiosInstance;
-  private _authRequester: (()=>Promise<DATA | ERROR | SUCCESS>) & {clear: ()=>void};
+
+  /** {@link IBaseAuthClient} */
+  authClient?: IBaseAuthClient<DATA, ERROR, SUCCESS, QUEUE>;
+
+  /** stage {@link EClientStage} */
   private __stage!: EClientStage;
+
+  /** stage {@link EClientStage} */
   private get _stage(): EClientStage{
     return this.__stage;
   };
+  /** stage {@link EClientStage} */
   private set _stage(_: EClientStage){
     D.current(["set stage:", _.toString()], {stackNumber: 1})
+    if (this.__stage != _){
+      switch(_){
+      case EClientStage.authorizing:
+        this._onAuthorizing?.();
+        break;
+      case EClientStage.fetching:
+        this._onFetching?.();
+        break;
+      case EClientStage.idle:
+        this._onIdle?.();
+        break;
+      }
+    }
     this.__stage = _;
   }
   get stage(){
     return this._stage;
   };
+
   isDataResponse: (response: DATA | ERROR | SUCCESS) => boolean;
   isErrorResponse: (response: DATA | ERROR | SUCCESS) => boolean;
   isSuccessResponse: (response: DATA | ERROR | SUCCESS) => boolean;
 
-  constructor(option: RemoteClientOption<DATA, ERROR, SUCCESS>){
-    const {requestChain, responseChain, config, isErrorResponse, isDataResponse, isSuccessResponse} = option;
+  constructor(public option: ClientOption<DATA, ERROR, SUCCESS>){
+    const {requestChain, responseChain, axiosConfig: config, isErrorResponse, isDataResponse, isSuccessResponse} = option;
     this.isErrorResponse = isErrorResponse;
     this.isDataResponse = isDataResponse;
     this.isSuccessResponse = isSuccessResponse;
-    this.authOption = Object.assign(<Required<RemoteClientAuthOption>>{
-      interval: 600,
-      url: "", 
-      payloadGetter: (()=>{}),
-      tokenGetter: (()=>""),
-      tokenUpdater: ((response)=>{}),
-      redirect: ((response)=>{
-        // window.location.href = "/"
-      }),
-    }, option.authOption ?? {});
     
     const authDebounceImmediate = true;
     this.requestChain = requestChain;
     this.responseChain = responseChain;
-    this.client = axios.create(config);
+    this.axios = axios.create(config);
     this._stage = EClientStage.idle;
-    this.queue = new Queue();
-    this._authClient = axios.create(this.authOption);
-    this._authRequester = debounce(async ()=>{
-      try{
-        const _inst = this._authClient;
-        const {url, payloadGetter, tokenGetter, tokenUpdater} = this.authOption;
-        const axiosOption = {
-          method: "post",
-          url,
-          data: payloadGetter(),
-          headers: {
-            Authorization: tokenGetter()
-          }
-        };
-        if (payloadGetter())
-          axiosOption.data = payloadGetter();
+    this.queue = new AsyncQueue();
+    
+    if (option.authOption){
+      option.authOption = Object.assign(<Required<ClientAuthOption>>{
+        ...DEFAULT_CLIENT_OPTION
+      }, option.authOption ?? {});
 
-        D.current(["auth before fetch!", url]);
-        const response = await _inst(axiosOption);
-        D.current(["auth response!", response]);
-        tokenUpdater(response);
-        this._stage = EClientStage.idle;
-        return response.data;
-      } catch(err){
-        console.error("Exception on auth request:", err);
-        this._stage = EClientStage.idle;
-        throw err;
-      }
-    }, this.authOption.interval, authDebounceImmediate);
+      this.authClient = new BaseAuthClient(
+        option.authOption!, 
+        this, 
+        ()=>this._stage = EClientStage.idle
+      );
+    }
 
     if (is.not.empty(requestChain)){
       BaseClientServicesPluginChains.install(requestChain, this, "request");
@@ -111,6 +110,7 @@ export class BaseRemoteClient<DATA , ERROR, SUCCESS>
   }
   
   // fixme: 由 queue 真的實作，由 queue中檢查，而不是設值
+  /** 設置 client 當前 stage */
   protected setStage(stage: EClientStage): void{
     switch(stage){
       case EClientStage.authorizing:
@@ -131,10 +131,17 @@ export class BaseRemoteClient<DATA , ERROR, SUCCESS>
     }
   }
 
-
   private _onIdle?: ()=>void;
   onIdle(cb: ()=>void){
     this._onIdle = cb;
+  }
+  private _onFetching?: ()=>void;
+  onFetching(cb: ()=>void){
+    this._onFetching = cb;
+  }
+  private _onAuthorizing?: ()=>void;
+  onAuthorizing(cb: ()=>void){
+    this._onAuthorizing = cb;
   }
   protected async _request(
     method: "get" | "post" | "put" | "delete", 
@@ -155,7 +162,7 @@ export class BaseRemoteClient<DATA , ERROR, SUCCESS>
 
       D.current(["_request, before fetch", option]);
       this.setStage(EClientStage.fetching);
-      const res = await this.client(option);
+      const res = await this.axios(option);
       const isValidAxiosResponse = res.data != undefined;
       isValidAxiosResponse 
         ? D.current(["_request, after fetch, with response", option]) 
@@ -193,7 +200,6 @@ export class BaseRemoteClient<DATA , ERROR, SUCCESS>
       return response;
     }) as any;
   }
-
   async get(url: string, payload: Record<string, any>): Promise<DATA | ERROR> {
     return this._request("get", url, Object.freeze(payload)) as Promise<DATA | ERROR>;
   }
@@ -206,9 +212,9 @@ export class BaseRemoteClient<DATA , ERROR, SUCCESS>
     });
   }
   async auth(): Promise<DATA | ERROR | SUCCESS> {
+    assert(()=>this.authClient != undefined && this.authClient.requester != undefined, "axios client for authorization not initialized properly");
     this.setStage(EClientStage.authorizing)
-    return this._authRequester();
-    // return this._request("post", url, payload, undefined, EClientStage.authorizing);
+    return this.authClient!.requester!();
   }
   async put(url: string, payload: Record<string, any>): Promise<DATA | ERROR | SUCCESS> {
     return this._request("put", url, Object.freeze(payload));
