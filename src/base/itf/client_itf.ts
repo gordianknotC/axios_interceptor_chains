@@ -13,6 +13,8 @@ export enum EClientStage {
   idle = "idle",
   fetching = "fetching",
   authorizing = "authorizing",
+  authFetched = "authFetched",
+  authUpdated = "authUpdated",
 }
 
 export type RedirectAction = {
@@ -170,7 +172,9 @@ export abstract class IBaseAuthClient<
   /** authorization 專用 axios instance, 不走 request/response interceptors */
   abstract axios: AxiosInstance;
   abstract option: ClientAuthOption;
-
+  abstract markIdle(): void;
+  abstract markFetched(): void;
+  abstract markUpdated(): void;
   abstract hostClient?: IBaseClient<DATA, ERROR, SUCCESS, QUEUE>;
   /** 加上 debounce 功能後專門用來請求 auth request 的方法, 防止短時間重複換發 auth token */
   abstract requester?: (() => Promise<DATA | ERROR | SUCCESS>) & {

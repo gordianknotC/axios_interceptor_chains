@@ -1,8 +1,8 @@
-import { BaseClient } from '@/base/impl/client_impl';
-import { authToken, authUrl, DataResponse, ErrorResponse, formatHeader, requestClientOption, SuccessResponse } from '../setup/client.test.setup';
+import { BaseClient } from '@/base/impl/base_client_impl';
+import { authToken, DataResponse, ErrorResponse, formatHeader, requestClientOption, SuccessResponse } from '../setup/client.test.setup';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import mockAxios, { getMockAxiosInstances, mockAdapter, mockServer } from '../__mocks__/axios';
-import { Arr, Completer } from '@gdknot/frontend_common';
+import { Arr, Completer, setupCurrentEnv } from '@gdknot/frontend_common';
 import { AxiosTestHelper } from '../helpers/axo.test.helper';
 import { EClientStage } from '@/index';
 
@@ -29,6 +29,7 @@ describe("Services", ()=>{
     helper = new AxiosTestHelper(client, authToken.value);
     instances = getMockAxiosInstances();
     axiosInstance = Arr(instances).last;
+    setupCurrentEnv("test");
   });
 
   describe("Remote Client", ()=>{
@@ -49,7 +50,7 @@ describe("Services", ()=>{
     test("send a request, expect fetching then switch to idle while there's nothing to do", async ()=>{
       expect(client.stage).toBe(EClientStage.idle);
       const future = helper.get("path/url/idle_triggered_or_not", {}, ()=>{
-        return {testIdle: "triggered or not"}
+        return Promise.resolve({testIdle: "triggered or not"})
       });
       expect(client.stage).toBe(EClientStage.fetching);
       await future;
@@ -65,23 +66,31 @@ describe("Services", ()=>{
     test("authA, expect throw an unAuthorization error by remote server", async()=>{
       authToken.value = "hot!!";
       const expectedResponse = {data: {token: preRenderedAuthToken}};
+      const errorResponse = {
+        message: 'Unauthorized',
+        error_name: 'Unauthorized',
+        error_code: 401,
+        error_key: 'Unauthorized'
+      };
       const useValidator = true;
-      expect(helper.auth(()=>{
+      await helper.auth(async ()=>{
+        console.log("expectedResponseA: ", expectedResponse)
         return expectedResponse;
-      }, useValidator)).resolves.toThrow();
-      
-      authToken.value = preRenderedAuthToken;
+      }, useValidator).catch((e)=>{
+        console.log("catch e:", e);
+        expect(e.response.data).toEqual(errorResponse);
+        expect(helper.authGuardForAuthClient!.canProcessReject).toBeCalled();
+        authToken.value = preRenderedAuthToken;
+      });
     });
 
     test("authB", async ()=>{
       authToken.value = "hot!!";
       const expectedResponse = {data: {token: preRenderedAuthToken}};
       const useValidator = false;
-      mockServer.registerResponse(authUrl, {data: {
-        token: preRenderedAuthToken
-      }}, useValidator);
+
       const future = helper.auth(()=>{
-        return expectedResponse;
+        return Promise.resolve(expectedResponse);
       }, useValidator);
       const msg = "interceptors did not mount by design on auth request";
       expect(client.stage).toBe(EClientStage.authorizing);
@@ -91,8 +100,10 @@ describe("Services", ()=>{
       expect(helper.networkErrorGuard?.canProcessFulFill, msg).not.toBeCalled();
       
       const result = await future;
+      expect(helper.authGuardForAuthClient!.canProcessFulFill).toBeCalled();
       expect(result).toEqual(expectedResponse);
       expect(client.stage).toBe(EClientStage.idle);
+      expect(authToken.value, "expect authToken to be updated by tokenUpdater").toEqual(expectedResponse.data.token);
       authToken.value = preRenderedAuthToken;
     });
   })
@@ -120,10 +131,10 @@ describe("Services", ()=>{
       };
       const payload = {};
       
-      mockServer.registerResponse(authUrl, {data: {
+      mockServer.registerResponse(helper.client.authClient?.option.url!, async ()=>({data: {
         token: preRenderedAuthToken
-      }}, false);
-      const fetched = await helper.get(url, payload, ()=>{
+      }}), false);
+      const fetched = await helper.get(url, payload, async()=>{
         return expectedFetched;
       });
       expect(mockAdapter).toBeCalled();
@@ -131,7 +142,9 @@ describe("Services", ()=>{
         Authorization: authToken.value
       }
     });
-  
+  });
+
+  describe("AuthGuard", ()=>{
     test("modify header force to raise unauthorized error",async ()=>{
       const url = "/path/to/get";
       const expectedFetched = {
@@ -145,28 +158,53 @@ describe("Services", ()=>{
       };
       const payload = {};
       authToken.value = "hot!!";
-      
-      mockServer.registerResponse(authUrl, {data: {
-        token: preRenderedAuthToken
-      }}, false);
-      const fetched = await helper.get(url, payload, ()=>{
-        return expectedFetched;
+      mockServer.registerResponse(
+        helper.client.authClient?.option.url!, 
+        async ()=>({data: {
+          token: preRenderedAuthToken
+        }}), 
+        false
+      );
+      const fetched = await helper.get(
+        url, 
+        payload, 
+        async ()=>{
+          return expectedFetched;
       });
       expect(mockAdapter).toBeCalled();
       expect(fetched).toEqual(expectedFetched);
-    });
-  });
-
-  
-  describe("AuthGuard", ()=>{
-    test("fetch a authorized request expect pass", ()=>{
-      expect(true).toBeTruthy();
+      expect(authToken.value).toEqual(preRenderedAuthToken);
     });
 
-    test("send an unauthorized request, expect authorizing and pending current one", ()=>{
-      expect(true).toBeTruthy();
+    test("send triple request simultaneously, one of witch is authorization", async ()=>{
+      const url1 = "/path/to/get/url1";
+      const expect1 = {data: {username: "expect1"}};
+      const url2 = "/path/to/get/url2";
+      const expect2 = {data: {username: "expect2"}}
+      const expect3 = {data: {authtoken: "hello"}};
+      const payload = {};
+      authToken.value = "hot!!";
+      const future1 = helper.get(url1, payload, async ()=>{
+        await wait(300);
+        return expect1;
+      });
+      const future2 = helper.get(url2, payload, async ()=>{
+        await wait(200);
+        return expect2;
+      });
+      const future3 = helper.auth(async ()=>{
+        await wait(250)
+        expect3
+      }, true);
+      expect(future1).resolves.toEqual(expect1)
+      expect(future2).resolves.toEqual(expect2)
+      expect(future3).resolves.toEqual(expect3)
+
+      // const A = await future1;
+      // const B = await future2;
+      // const C = await future3;
     });
-  });
+  })
 
 });
 

@@ -1,4 +1,4 @@
-import { BaseAuthResponseGuard, BaseAuthResponseGuardForAuthClient } from "@/base/impl/base_auth_response_guard_impl";
+import { BaseAuthResponseGuard } from "@/base/impl/base_auth_response_guard";
 import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
 import { BaseClientServiceResponsePlugin } from "@/base/impl/response_plugins_impl";
 import {
@@ -9,6 +9,7 @@ import { wait } from "@/utils/common_utils";
 import { Completer, QueueItem, UnExpectedError } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
+import { AuthClientResponseGuard } from "@/base/impl/base_auth_client_response_guard";
 
 
 
@@ -25,12 +26,9 @@ export class ForbiddenResponseGuard extends BaseClientServiceResponsePlugin {
 
  
 export class AuthResponseGuard extends BaseAuthResponseGuard {
-  protected onRequestNewAuth(error: AxiosError,  pendingRequest: Completer<any, QueueItem>): Promise<AxiosResponse>{
-    return super.onRequestNewAuth(error, pendingRequest);
+  protected onRequestNewAuth(error: AxiosError,  ): Promise<AxiosResponse>{
+    return super.onRequestNewAuth(error);
   }
 }
 
 
-export class AuthResponseGuardForAuthClient extends BaseAuthResponseGuardForAuthClient {
- 
-}

@@ -10,6 +10,7 @@ import { LogModules } from "@/setup/logger.setup";
 
 const D = new Logger(LogModules.Client) 
 
+
 export class BaseAuthClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest=QueueRequest> 
 implements IBaseAuthClient<DATA, ERROR, SUCCESS, QUEUE> {
   requestChain: BaseClientServicesPluginChains<AxiosRequestConfig<any>, AxiosRequestConfig<any>, any>[];
@@ -20,8 +21,11 @@ implements IBaseAuthClient<DATA, ERROR, SUCCESS, QUEUE> {
   constructor(
     public option: ClientAuthOption, 
     public hostClient: IBaseClient<DATA , ERROR, SUCCESS, QUEUE>,
-    private idleSetter: ()=>void,
+    public markIdle: ()=>void,
+    public markFetched: ()=>void,
+    public markUpdated: ()=>void,
   ){
+    D.info(["AuthClient init"])
     const {requestChain, responseChain, axiosConfig: config} = option;
     const authDebounceImmediate = true;
 
@@ -48,14 +52,15 @@ implements IBaseAuthClient<DATA, ERROR, SUCCESS, QUEUE> {
         const response = await _inst(axiosOption);
         D.current(["auth response!", response]);
         tokenUpdater(response);
+        markUpdated();
         // 這裡直接存取私有屬性，以繞開 setStage 於 authorizing 下不能轉 idle
         // authorizing 變更為 idle 只能透過 private _stage
-        idleSetter();
+        markIdle();
         return response.data;
       } catch(err){
         console.error("Exception on auth request:", err);
-        idleSetter();
-        throw err;
+        markIdle();
+        return Promise.reject(err)
       }
     }, option.interval, authDebounceImmediate);
 

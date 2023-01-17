@@ -1,12 +1,15 @@
+import { LogModules } from "@/setup/logger.setup";
 import { ensureCanProcessFulFill, ensureCanReject } from "@/utils/common_utils";
-import { assert, AssertMsg } from "@gdknot/frontend_common";
+import { assert, AssertMsg, Logger } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse, AxiosResponseHeaders } from "axios";
 import { AnyMxRecord } from "dns";
 import type { ClientAuthOption, ClientOption, IBaseAuthClient, IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain,  } from "./client_itf"
 
+const D = new Logger(LogModules.Plugin);
+
 export interface ResponseInterceptorUse<V> {
-    onFulfilled?: ((value: V) => V | Promise<V>) | null, 
-    onRejected?: ((error: any) => any) | null, 
+  onFulfilled?: ((value: V) => V | Promise<V>) | null, 
+  onRejected?: ((error: any) => any) | null, 
 }
 
 const byPassAll = false;
@@ -20,7 +23,11 @@ export function processResponseFulFill(
   chain?: BaseClientServicesPluginChains<any, any, any>
 ): Promise<AxiosResponse> {
   if (!chain) return Promise.resolve(response);
-  if (ensureCanProcessFulFill(() => chain.canProcessFulFill(response))) {
+  if (ensureCanProcessFulFill(() => {
+    D.info([chain.constructor.name, "Response.canProcessFulFill", chain.canProcessFulFill(response)])
+    return chain.canProcessFulFill(response);
+  })) {
+    D.info([chain.constructor.name, "Response.processFulFill"])
     return chain.processFulFill(response);
   } else {
     if (chain.next && chain.canGoNext(response.config!)) {
@@ -35,7 +42,11 @@ export function processResponseReject(
   chain?: BaseClientServicesPluginChains<any, any, any>
 ): Promise<AxiosError | AxiosResponse> {
   if (!chain) return Promise.reject(error!);
-  if (ensureCanReject(() => chain.canProcessReject(error))) {
+  if (ensureCanReject(() => {
+    D.info([chain.constructor.name, "Response.canProcessReject", chain.canProcessReject(error)])
+    return chain.canProcessReject(error);
+  })) {
+    D.info([chain.constructor.name, "Response.processReject"])
     return chain.processReject(error);
   } else {
     if (chain.next && chain.canGoNext(error.config!)) {
@@ -69,7 +80,11 @@ export function processRequestFulFill(
   chain?: BaseClientServicesPluginChains<any, any, any>
 ): AxiosRequestConfig {
   if (!chain) return config;
-  if (ensureCanProcessFulFill(() => chain.canProcessFulFill(config))) {
+  if (ensureCanProcessFulFill(() => {
+    D.info([chain.constructor.name, "Request.canProcessFulFill", chain.canProcessFulFill(config)])
+    return chain.canProcessFulFill(config);
+  })) {
+    D.info([chain.constructor.name, "Request.processFulFill"])
     return chain.processFulFill(config);
   } else {
     if (chain.next && chain.canGoNext(config))
@@ -83,7 +98,11 @@ export function processRequestReject(
   chain?: BaseClientServicesPluginChains<any, any, any>
 ): Promise<AxiosError | AxiosResponse> {
   if (!chain) return Promise.reject(error!);
-  if (ensureCanReject(() => chain.canProcessReject(error))) {
+  if (ensureCanReject(() => {
+    D.info([chain.constructor.name, "Request.canProcessReject", chain.canProcessReject(error)])
+    return chain.canProcessReject(error);
+  })) {
+    D.info([chain.constructor.name, "Request.processReject"])
     return chain.processReject(error).catch((e) => {
       console.error("catch on processError", e);
       return Promise.reject(e);

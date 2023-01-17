@@ -59,9 +59,11 @@ export class BaseAuthResponseGuard
   *     - {@link onAuthUncaughtError}
   */
   async processReject(error: AxiosError): Promise<AxiosResponse | AxiosError> {
+    D.info(["onRestoreRequest"])
     const pending = this.onRestoreRequest(error);
-    const authResponse = this.onRequestNewAuth(error, pending);
-    return super.processFulFill(await pending.future);
+    D.info(["onRequestNewAuth"])
+    const authResponse = await this.onRequestNewAuth(error);
+    return Promise.resolve(pending.future);
   }
  
   /** ### 用來生成代替 unauthorized error 的空請求
@@ -73,7 +75,6 @@ export class BaseAuthResponseGuard
    */
   protected onRestoreRequest(error: AxiosError): Completer<any, QueueItem>{
     const requestConfig = error.config!;
-    D.info(["enqueue request:", requestConfig]);
     const timeout = this.client!.axios.defaults.timeout ?? 10 * 1000;
     const item = this.client?.queue.enqueueWithoutId(() => {
       return wait(timeout);
@@ -89,94 +90,9 @@ export class BaseAuthResponseGuard
    * 會更新 pendingRequest 的內容，在這之前 pendingRequest 的 Promise 物件會一直保持 pending，
    * 除非 timeout
    */
-  protected onRequestNewAuth(error: AxiosError,  pendingRequest: Completer<any, QueueItem>): Promise<AxiosResponse>{
+  protected onRequestNewAuth(error: AxiosError): Promise<AxiosResponse>{
     return this.client!.auth();
   }
 }
 
 
-
-
-export class BaseAuthResponseGuardForAuthClient 
-  extends BaseClientServiceResponsePlugin<IBaseAuthClient<any, any, any>> 
-{
-  client?: IBaseAuthClient<any, any, any>;
-  prev?: BaseClientServicesPluginChains<AxiosResponse, Promise<AxiosResponse>, IBaseAuthClient<any, any, any>>;
-  next?: BaseClientServicesPluginChains<AxiosResponse, Promise<AxiosResponse>, IBaseAuthClient<any, any, any>>;
-
-  get isAuthorizing(): boolean{
-    return this.client!.hostClient!.stage == EClientStage.authorizing;
-  }
-  get hasQueue(): boolean{
-    return !this.client!.hostClient!.queue.isEmpty;
-  }
-  get host(): IBaseClient<any, any, any>{
-    return this.client!.hostClient!;
-  }
-  get queue(): AsyncQueue<QueueRequest>{
-    return this.client!.hostClient!.queue;
-  }
-  constructor() {
-    super();
-  }
-
-  /** ### 用來處理當 unauthorized error 後 auth token 換發成功
-   * @param errorResponseBeforeReAuth - auth token 換發「前」失敗的 response 
-   * @param queueItem - 於 {@link onBeforeRequestNewAuth} 所生成的新 Promise 請求，用來代替 ReAuth 前的失敗請求
-   */
-  protected onAuthSuccess(
-    response: AxiosResponse<any, any>
-  ): AxiosResponse{
-    D.info(["onAuthSuccess"]);
-    for (let index = 0; index < this.queue.queue.length; index++) {
-      const completer = this.queue.queue[index];
-      const id = completer._meta!.id;
-      this.host.requestByConfig(
-        (completer._meta!.meta as QueueRequest).requestConfig
-      ).then((_) => {
-        this.queue.dequeueByResult({ id, result: _ });
-      });
-    }
-    return response;
-  }
-
-  /** ### 用來處理當 unauthorized error 後 auth token 可預期下的換發失敗
-   * @param authFailedResponse - auth token 換發前失敗的 response 
-   * @returns - {@link AxiosResponse}
-   */
-  protected onAuthError(authFailedResponse: AxiosResponse)  {
-    D.info(["onAuthError"]);
-    if (this.host!.option.authOption){
-      const action = this.host!.option!.authOption!.redirect?.(authFailedResponse) ?? {
-        clearQueue: true,
-      };
-      if (action.clearQueue) 
-        this.client?.queue.clearQueue();
-    }
-  }
-  
-  protected onAuthUncaughtError(error: AxiosError<unknown, any>): void {
-  }
-
-  /** 
-   * 1) 當 authorizing 發出時，2) request queue 有東西
-  */
-  canProcessFulFill(config: AxiosResponse<any, any>): boolean {
-    return this.isAuthorizing && this.hasQueue;
-  }
-  processFulFill(response: AxiosResponse<any, any>): Promise<AxiosResponse<any, any>> {
-    return super.processFulFill(this.onAuthSuccess(response));
-  }
-  /** 當 authorizing 發出, 且被 reject */
-  canProcessReject(error: AxiosError<unknown, any>): boolean {
-    return this.isAuthorizing && error.response?.status == axios.HttpStatusCode.Unauthorized;
-  }
-  processReject(error: AxiosError<unknown, any>): Promise<AxiosResponse<any, any> | AxiosError<unknown, any>> {
-    if (this.host.isErrorResponse(error.response)){
-      this.onAuthError(error.response!);
-    }else{
-      this.onAuthUncaughtError(error);
-    }
-    return super.processReject(error);
-  }
-}

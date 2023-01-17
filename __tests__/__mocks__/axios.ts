@@ -46,7 +46,8 @@ class MockedServer {
     this.setHeaderValidator((config: AxiosRequestConfig) => {
       try {
         const token = (config.headers as AxiosHeaders).get("Authorization");
-        const authorized = token == authToken.value;
+        const authorized = token == validToken;
+        console.log("authorized?:", authorized, token, validToken);
         // 無錯誤
         if (authorized) return null;
 
@@ -65,9 +66,19 @@ class MockedServer {
           headers: {},
           config,
         };
-        return response;
+        const error: AxiosError = {
+          isAxiosError: true,
+          toJSON: function (): object {
+            return response;
+          },
+          name,
+          message,
+          response,
+          config,          
+        };
+        return error;
       } catch (e) {
-        console.error("setAuthHeaderGuard failed, config:", config);
+        console.error("setAuthHeaderGuard failed, config:", config, "error:", e);
         throw e;
       }
     });
@@ -84,41 +95,48 @@ class MockedServer {
   ) {
     this.headerValidator = validator;
   }
-  registerResponse(url: string, response: any, useValidator: boolean = true) {
+  registerResponse(url: string, responseCB: ()=>Promise<any>, useValidator: boolean = true) {
     this.registry[url] = merge(this.defaultResponse, {
-      data: response,
+      data: responseCB,
       useValidator,
     });
     console.log("register response:", url, this.registry[url]);
   }
-  getResponse(config: AxiosRequestConfig): Promise<AxiosResponse | AxiosError> {
+  async getResponse(config: AxiosRequestConfig): Promise<AxiosResponse | AxiosError> {
+    console.log("mockServer getResponse", config.url!);
     const url = config.url!;
     const header = config!.headers;
-    const response: AxiosResponse = {
-      ...(this.registry[url] ?? this.defaultResponse),
+    const promiseData = ((this.registry[url]?.data )as ()=>Promise<any>)();
+    const responseWithoutData: AxiosResponse = {
+      ...this.defaultResponse,
       config,
     };
     const useValidator = this.registry[url]?.useValidator ?? true;
-    console.log("mockServer getResponse", url);
     if (this.registry[url]) {
-      console.log("found registered result on url", url, this.registry[url]);
+      console.log("found registered result on url", url);
     }
     if (useValidator) {
       if (!this.headerValidator) {
         console.log("no header validator - resolve response:");
+        responseWithoutData.data = await promiseData;
+        const response = responseWithoutData;
         return Promise.resolve(response);
       } else {
         const errorResponse = this.headerValidator(config);
         const isHeaderValid = errorResponse == undefined;
         if (isHeaderValid) {
-          console.log("valid header - resolve response:");
+          responseWithoutData.data = await promiseData;
+          const response = responseWithoutData;
+          console.log("valid header - ", response);
           return Promise.resolve(response);
         } else {
-          console.log("invalid header - reject response:", config.headers);
+          console.log("invalid header - ", config.headers);
           return Promise.reject(errorResponse);
         }
       }
     } else {
+      responseWithoutData.data = await promiseData;
+      const response = responseWithoutData;
       return Promise.resolve(response);
     }
   }
@@ -128,10 +146,10 @@ class MockedServer {
 }
 
 function getMockedAdapter(mockServer: MockedServer): jest.Mock<any> {
-  const mockAdapter = jest.fn((config) => {
+  const mockAdapter = jest.fn(async (config) => {
     config.headers.set("User-Agent", "axios/" + "1.2.1", false);
     console.log("before mockServer.getResponse, headers:", config.headers);
-    const response = mockServer.getResponse(config);
+    const response = await mockServer.getResponse(config);
     config.data = response;
     console.log("mockAdapter return response");
     return response;

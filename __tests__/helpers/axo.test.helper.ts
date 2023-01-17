@@ -1,11 +1,12 @@
-import { BaseClient } from "@/base/impl/client_impl";
+import { BaseClient } from "@/base/impl/base_client_impl";
 import { AuthResponseGuard } from "@/presets/auth_response_guard";
 import { UpdateAuthHeaderPlugin, UpdateExtraHeaderPlugin } from "@/presets/request_header_updater";
-import { authToken, authUrl, ErrorResponse, formatHeader } from "../setup/client.test.setup";
+import { authToken, formatHeader } from "../setup/client.test.setup";
 import { mockAdapter, mockServer } from "../__mocks__/axios";
 import type {AxiosResponse} from "axios";
 import { Arr } from '@gdknot/frontend_common';
 import { NetworkErrorResponseGuard } from "@/presets/network_error_response_guard";
+import { ACAuthResponseGuard } from "@/presets/auth_client_guards";
  
 
 export function wrapImplementation<T extends {}, Key extends keyof T>(
@@ -20,7 +21,7 @@ export function wrapImplementation<T extends {}, Key extends keyof T>(
       try{
         return newImpl(origImplementation(...args), ...args);
       }catch(e){
-        console.warn("Exception on wrapImplementation, propName", propName, "inst.name:", inst.constructor.name)
+        console.warn("Exception on wrapImplementation, propName", propName, "inst.name:", inst.constructor.name, e)
         throw e;
       }
     })
@@ -64,6 +65,14 @@ class AxiosTestHelper {
     client.responseChain.forEach((guard)=>{
       wrapGuardImpl(guard);
     });
+
+    client.authClient!.requestChain.forEach((guard)=>{
+      wrapGuardImpl(guard);
+    });
+
+    client.authClient!.responseChain.forEach((guard)=>{
+      wrapGuardImpl(guard);
+    });
   }
   get authGuard(){
     return Arr(this.client.responseChain).firstWhere((_)=>_.constructor.name == AuthResponseGuard.name);
@@ -77,45 +86,52 @@ class AxiosTestHelper {
   get extraHeaderUpdater(){
     return Arr(this.client.requestChain).firstWhere((_)=>_.constructor.name == UpdateExtraHeaderPlugin.name);
   }
+  get authGuardForAuthClient(){
+    return Arr(this.client.authClient!.responseChain).firstWhere((_)=>_.constructor.name == ACAuthResponseGuard.name);
+  }
 
 
-  get(url: string, payload: any, result: ()=>any){
+  get(url: string, payload: any, result: ()=>Promise<any>){
     const _url = (new URL(url, 'http://localhost'))
     _url.search = new URLSearchParams(payload).toString();
-    mockServer.registerResponse(url, result());
+    mockServer.registerResponse(url, result);
     return this.client.get(url, payload);
   }
-  auth(result: ()=>any, useValidator: boolean = false){
-    const url = this.client.option.authOption!.url!;
+  auth(result: ()=>Promise<any>, useValidator: boolean = false){
+    const url = this.client.option.authOption.url!;
     const _rawUrl = (new URL(url, 'http://localhost'))
     _rawUrl.search = new URLSearchParams(this.client.option.authOption!.payloadGetter()).toString();
-    mockServer.registerResponse(url, result(), useValidator);
+    mockServer.registerResponse(url, result, useValidator);
     return this.client.auth();
   }
-  put(url: string, data: any, result: ()=>any){
+  put(url: string, data: any, result: ()=>Promise<any>){
     const _url = (new URL(url, 'http://localhost'))
     _url.search = new URLSearchParams(data).toString();
-    mockServer.registerResponse(url, result());
+    mockServer.registerResponse(url, result);
     return this.client.put(url, data);
   }
-  post(url: string, data: any, result: ()=>any){
+  post(url: string, data: any, result: ()=>Promise<any>){
     const _url = (new URL(url, 'http://localhost'))
     _url.search = new URLSearchParams(data).toString();
-    mockServer.registerResponse(url, result());
+    mockServer.registerResponse(url, result);
     return this.client.post(url, data);
   }
-  del(url: string, data: any, result: ()=>any){
+  del(url: string, data: any, result: ()=>Promise<any>){
     const _url = (new URL(url, 'http://localhost'))
     _url.search = new URLSearchParams(data).toString();
-    mockServer.registerResponse(url, result());
+    mockServer.registerResponse(url, result);
     return this.client.del(url, data);
   }
 
   async expectUnauthorized(url: string, payload: any, mockReturns: any, expectedFetched: any){
     authToken.value = "hot!!";
-    mockServer.registerResponse(authUrl, {data: {
-      token: this.authToken
-    }}, false);
+    mockServer.registerResponse(
+      this.client.option.authOption.url!, 
+      ()=>Promise.resolve({data: {
+        token: this.authToken
+      }}), 
+      false)
+    ;
     const fetched = await this.get(url, payload, ()=>{
       return mockReturns;
     });

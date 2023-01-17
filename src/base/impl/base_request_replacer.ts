@@ -5,8 +5,8 @@ import {
   IBaseClient,
 } from "@/base/itf/client_itf";
 import { assert, NotImplementedError } from "@gdknot/frontend_common";
-import { AxiosError, AxiosRequestConfig, AxiosHeaders } from "axios";
-import { BaseRequestGuard } from "./base_request_guard_impl";
+import axios, { AxiosError, AxiosRequestConfig, AxiosHeaders } from "axios";
+import { BaseRequestGuard } from "./base_request_guard";
 
 /** 
  * {@inheritdoc BaseRequestGuard}
@@ -51,7 +51,8 @@ export class BaseRequestReplacer<
    * reject進行攔截  
    * */
   processFulFill(config: AxiosRequestConfig<any>): AxiosRequestConfig<any> {
-    throw new AxiosError(BaseRequestReplacer.errorMessageForReplacement)
+    const code = undefined;
+    throw new axios.AxiosError(BaseRequestReplacer.errorMessageForReplacement, code, config);
   }
   /** 
    * 
