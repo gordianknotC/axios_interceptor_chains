@@ -11,6 +11,7 @@ export type AxiosConfigHeader = {
  * 所有 request chain 均繼承 {@link BaseClientServiceRequestPlugin} */
 export declare abstract class BaseClientServiceRequestPlugin<CLIENT extends IBaseClientResponsibilityChain & IBaseClientProperties<any> = IBaseClient<any, any, any>> extends BaseClientServicesPluginChains<AxiosRequestConfig, AxiosRequestConfig, CLIENT> {
     constructor();
+    assertCanAssemble(): string | undefined;
     canGoNext(config: AxiosRequestConfig): boolean;
     /**
      * 決定是否能夠進行至 {@link processFulFill}

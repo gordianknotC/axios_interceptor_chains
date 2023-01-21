@@ -35,6 +35,8 @@ export declare abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INP
     abstract next?: BaseClientServicesPluginChains<INPUT, OUTPUT, CLIENT>;
     /** ClientService */
     abstract client?: CLIENT;
+    /** assertion for assembling responsibility chain */
+    abstract assertCanAssemble(): string | undefined;
     abstract processFulFill(config: INPUT): OUTPUT;
     abstract processReject(error: AxiosError): Promise<AxiosError | AxiosResponse>;
     /** 增加下一個 chain */
@@ -48,5 +50,13 @@ export declare abstract class BaseClientServicesPluginChains<INPUT, OUTPUT = INP
     canProcessFulFill(config: INPUT): boolean;
     /** default: true */
     canProcessReject(error: AxiosError): boolean;
+    protected _onProcess?: () => void;
+    onProcess(cb: () => void, terminateAfterCall?: boolean): void;
+    protected _onProcessReject?: () => void;
+    onProcessReject(cb: () => void, terminateAfterCall?: boolean): void;
+    protected _onCanProcess?: () => void;
+    onCanProcess(cb: () => void, terminateAfterCall?: boolean): void;
+    protected _onCanProcessReject?: () => void;
+    onCanProcessReject(cb: () => void, terminateAfterCall?: boolean): void;
     init(client: CLIENT): void;
 }

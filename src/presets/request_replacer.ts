@@ -2,7 +2,7 @@ import {  BaseRequestReplacer } from "@/base/impl/base_request_replacer";
 import { QueueRequest } from "@/base/itf/client_itf";
 import { wait } from "@/utils/common_utils";
 import { Completer, QueueItem } from "@gdknot/frontend_common";
-import { AxiosHeaders, AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosError, AxiosHeaders, AxiosRequestConfig, AxiosResponse } from "axios";
 
 export type AxiosHeaderValue = AxiosHeaders | string | string[] | number | boolean | null;
 export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;
@@ -21,16 +21,5 @@ export class RequestReplacer<
 
   canProcessFulFill(config: AxiosRequestConfig<any>): boolean {
     return super.canProcessFulFill(config);
-  }
-
-  protected newRequest(config: AxiosRequestConfig<any>): Promise<any> {
-    const timeout = this.client!.axios.defaults.timeout ?? 10 * 1000;
-    const completer = this.client?.queue.enqueueWithoutId(()=>{
-      // 等待其他 plugin 清除
-      return wait(timeout);
-    })!;
-    const queueItem = completer!._meta!;
-    queueItem.meta = {requestConfig: config};
-    return completer!.future;
   }
 }

@@ -1,4 +1,4 @@
-import { BaseAuthResponseGuard, BaseAuthResponseGuardForAuthClient } from "../base/impl/base_auth_response_guard_impl";
+import { BaseAuthResponseGuard } from "../base/impl/base_auth_response_guard";
 import { BaseClientServicesPluginChains } from "../base/itf/plugin_chains_itf";
 import { BaseClientServiceResponsePlugin } from "../base/impl/response_plugins_impl";
 import { IBaseClient } from "../base/itf/client_itf";
@@ -11,7 +11,13 @@ export declare class ForbiddenResponseGuard extends BaseClientServiceResponsePlu
     canProcessReject(error: AxiosError<unknown, any>): boolean;
 }
 export declare class AuthResponseGuard extends BaseAuthResponseGuard {
-    protected onRequestNewAuth(error: AxiosError, pendingRequest: Completer<any, QueueItem>): Promise<AxiosResponse>;
-}
-export declare class AuthResponseGuardForAuthClient extends BaseAuthResponseGuardForAuthClient {
+    protected onRequestNewAuth(error: AxiosError): Promise<AxiosResponse>;
+    protected onRestoreRequest(error: AxiosError): Completer<any, QueueItem>;
+    processReject(error: AxiosError<unknown, any>): Promise<AxiosResponse<any, any> | AxiosError<unknown, any>>;
+    /**
+     * @returns -
+     * error.response?.status == axios.HttpStatusCode.Unauthorized
+        || error.message == BaseRequestReplacer.errorMessageForReplacement;
+     */
+    canProcessReject(error: AxiosError<unknown, any>): boolean;
 }

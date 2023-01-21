@@ -62,9 +62,10 @@ export class BaseClient {
         this._stage = EClientStage.idle;
         this.queue = new AsyncQueue();
         if (option.authOption) {
-            option.authOption = Object.assign({
+            option.authOption = Object.freeze(Object.assign({
                 ...DEFAULT_CLIENT_OPTION
-            }, option.authOption ?? {});
+            }, option.authOption ?? {}));
+            console.log("option.authOption:", option.authOption);
             this.authClient = new BaseAuthClient(option.authOption, this, () => this._stage = EClientStage.idle);
         }
         if (is.not.empty(requestChain)) {

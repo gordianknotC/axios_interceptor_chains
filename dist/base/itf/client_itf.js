@@ -10,6 +10,8 @@ export var EClientStage;
     EClientStage["idle"] = "idle";
     EClientStage["fetching"] = "fetching";
     EClientStage["authorizing"] = "authorizing";
+    EClientStage["authFetched"] = "authFetched";
+    EClientStage["authUpdated"] = "authUpdated";
 })(EClientStage || (EClientStage = {}));
 //
 //

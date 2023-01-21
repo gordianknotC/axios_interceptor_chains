@@ -14,7 +14,6 @@ const D = new Logger(LogModules.Client)
 export
 const DEFAULT_AUTH_CLIENT_OPTION: Partial<ClientAuthOption> = {
   interval: 600,
-  url: "", 
   payloadGetter: (()=>{}),
   tokenGetter: (()=>""),
   tokenUpdater: ((response)=>{}),
@@ -44,7 +43,7 @@ export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = Queu
   authClient?: IBaseAuthClient<DATA, ERROR, SUCCESS, QUEUE>;
 
   /** stage {@link EClientStage} */
-  private __stage!: EClientStage;
+  private __stage: EClientStage = EClientStage.idle;
 
   /** stage {@link EClientStage} */
   private get _stage(): EClientStage{
@@ -52,24 +51,29 @@ export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = Queu
   };
   /** stage {@link EClientStage} */
   private set _stage(_: EClientStage){
-    D.current(["set stage:", _.toString()], {stackNumber: 1})
     if (this.__stage != _){
       switch(_){
         case EClientStage.authorizing:
-          this._onAuthorizing?.();
+          console.log("call authorizing:", this._onAuthorizing)
+          this._onAuthorizing?.(this.__stage);
           break;
         case EClientStage.fetching:
-          this._onFetching?.();
+          this._onFetching?.(this.__stage);
           break;
         case EClientStage.idle:
-          this._onIdle?.();
+          this._onIdle?.(this.__stage);
           break;
         case EClientStage.authFetched:
-          this._onAuthFetched?.();
+          this._onAuthFetched?.(this.__stage);
+          break;
+        case EClientStage.authUpdated:
+          this._onAuthUpdated?.(this.__stage);
           break;
       }
     }
+    D.info(["set stage:", _.toString(), this.__stage.toString()])
     this.__stage = _;
+    this._onStageChanged?.(this.stage);
   }
   get stage(){
     return this._stage;
@@ -93,16 +97,18 @@ export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = Queu
     this.queue = new AsyncQueue();
     
     if (option.authOption){
-      option.authOption = Object.assign(<Required<ClientAuthOption>>{
-        ...DEFAULT_AUTH_CLIENT_OPTION
-      }, option.authOption ?? {});
+      option.authOption = Object.freeze(Object.assign(<Required<ClientAuthOption>>{
+        ...DEFAULT_AUTH_CLIENT_OPTION,
+        }, option.authOption ?? {}
+      ));
 
       this.authClient = new BaseAuthClient(
         option.authOption!, 
         this, 
+        ()=>this._stage = EClientStage.authorizing,
         ()=>this._stage = EClientStage.idle,
         ()=>this._stage = EClientStage.authFetched,
-        ()=>this._stage = EClientStage.authFetched
+        ()=>this._stage = EClientStage.authUpdated
       );
     }
 
@@ -138,25 +144,42 @@ export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = Queu
     }
   }
 
-  private _onIdle?: ()=>void;
-  onIdle(cb: ()=>void){
-    this._onIdle = cb;
+  private _onStageChanged?: (stage: EClientStage)=>void;
+  onStageChanged(cb: (stage: EClientStage)=>void, wipeAfterCall: boolean = false){
+    this._onStageChanged = wipeAfterCall 
+      ? ()=>{cb(this.stage); this._onStageChanged = undefined}
+      : cb;
   }
-  private _onFetching?: ()=>void;
-  onFetching(cb: ()=>void){
-    this._onFetching = cb;
+  
+  private _onIdle?: (prev: EClientStage)=>void;
+  onIdle(cb: (prev: EClientStage)=>void, wipeAfterCall: boolean = false){
+    this._onIdle = wipeAfterCall 
+      ? (prev: EClientStage)=>{cb(prev); this._onIdle = undefined}
+      : cb;
   }
-  private _onAuthorizing?: ()=>void;
-  onAuthorizing(cb: ()=>void){
-    this._onAuthorizing = cb;
+  private _onFetching?: (prev: EClientStage)=>void;
+  onFetching(cb: ()=>void, wipeAfterCall: boolean = false){
+    this._onFetching = wipeAfterCall 
+      ? ()=>{cb(); this._onFetching = undefined}
+      : cb;
   }
-  private _onAuthFetched?: ()=>void;
-  onAuthFetched(cb: ()=>void){
-    this._onAuthFetched = cb;
+  private _onAuthorizing?: (prev: EClientStage)=>void;
+  onAuthorizing(cb: (prev: EClientStage)=>void, wipeAfterCall: boolean = false){
+    this._onAuthorizing = wipeAfterCall 
+      ? (prev)=>{cb(prev); this._onAuthorizing = undefined}
+      : cb;
   }
-  private _onAuthUpdated?: ()=>void;
-  onAuthUpdated(cb: ()=>void){
-    this._onAuthUpdated = cb;
+  private _onAuthFetched?: (prev: EClientStage)=>void;
+  onAuthFetched(cb: (prev: EClientStage)=>void, wipeAfterCall: boolean = false){
+    this._onAuthFetched = wipeAfterCall 
+      ? (prev)=>{cb(prev); this._onAuthFetched = undefined}
+      : cb;
+  }
+  private _onAuthUpdated?: (prev: EClientStage)=>void;
+  onAuthUpdated(cb: (prev: EClientStage)=>void, wipeAfterCall: boolean = false){
+    this._onAuthUpdated = wipeAfterCall 
+      ? (prev)=>{cb(prev); this._onAuthUpdated = undefined}
+      : cb;
   }
   protected async _request(
     method: "get" | "post" | "put" | "delete", 
@@ -175,13 +198,13 @@ export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = Queu
         return res.data!;
       };
 
-      D.current(["_request, before fetch", option]);
+      D.info(["_request, before fetch", option]);
       this.setStage(EClientStage.fetching);
       const res = await this.axios(option);
       const isValidAxiosResponse = res.data != undefined;
       isValidAxiosResponse 
-        ? D.current(["_request, after fetch, with response", option]) 
-        : D.current(["_request, after fetch, no data response", option]);
+        ? D.info(["_request, after fetch, with response", option]) 
+        : D.info(["_request, after fetch, no data response", option]);
 
       this.setStage(EClientStage.idle);
       return responseTransformer(res);
@@ -205,16 +228,16 @@ export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = Queu
         }
         throw new Error(`[AxiosError]: ${JSON.stringify(msg)}`)
       }
-      throw new Error(`Catch Error on _request: ${JSON.stringify(e)}`);
+      throw new Error(`${e}`);
     }
   }
 
   async requestByConfig(config: AxiosRequestConfig): Promise<AxiosResponse>{
-    const {method, url, data} = config;
-    D.current(["requestByConfig", url, data]);
-    return this._request(method as any, url!, Object.freeze(data), undefined, (response)=>{
+    const {method, url, data, headers} = config;
+    D.info(["requestByConfig", url, data]);
+    return this._request(method as any, url!, Object.freeze(data), headers ?? {} as any, (response)=>{
       return response;
-    }) as any;
+    }, config) as any;
   }
   async get(url: string, payload: Record<string, any>): Promise<DATA | ERROR> {
     return this._request("get", url, Object.freeze(payload)) as Promise<DATA | ERROR>;
@@ -229,9 +252,8 @@ export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = Queu
   }
   async auth(): Promise<DATA | ERROR | SUCCESS> {
     assert(()=>this.authClient != undefined && this.authClient.requester != undefined, "axios client for authorization not initialized properly");
-    this.setStage(EClientStage.authorizing)
     return this.authClient!.requester!().then((_)=>{
-      D.current(["auth response:", _]);
+      D.info(["auth response:", _]);
       return _;
     });
   }

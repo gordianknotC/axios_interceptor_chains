@@ -1,14 +1,17 @@
 import {
-  UpdateAuthHeaderPlugin,
-  UpdateExtraHeaderPlugin,
+  ClientRequestAuthHeaderUpdater,
+  ClientRequestExtraHeaderUpdater,
 } from "@/presets/request_header_updater";
 import { AuthResponseGuard } from "@/presets/auth_response_guard";
 import { NetworkErrorResponseGuard } from "@/presets/network_error_response_guard";
-import { AxiosResponse } from "axios";
+import axios, { Axios, AxiosResponse, AxiosStatic, HttpStatusCode } from "axios";
 import { ClientOption } from "@/base/itf/client_itf";
 import { RequestReplacer } from "@/presets/request_replacer";
 import { ACAuthResponseGuard, ACFetchedMarker, ACIdleMarker, ACTokenUpdater } from "@/presets/auth_client_guards";
+import { AxiosTestHelper } from "../helpers/axo.test.helper";
+import { authToken, _EErrorCode } from "../__mocks__/axios";
 
+export const EErrorCode = _EErrorCode;
 
 export type DataResponse<T> = { 
   data: T; pager: any
@@ -27,9 +30,18 @@ export type AuthResponse = DataResponse<{
 const timeout = 10 * 1000;
 const baseURL = "http://localhost";
 
-export const authToken = { value: "I'M Auth Token" };
 export const formatHeader = { value: { format: "mock" } };
 const authUrl = "path/to/auth_url";
+
+
+export const customizedErrors: Partial<Record<HttpStatusCode, ErrorResponse>> = {
+  [axios.HttpStatusCode.Unauthorized]: {
+    message: "Unauthorized",
+    error_name:  "Unauthorized",
+    error_code: 401,
+    error_key:  "Unauthorized"
+  } as any
+}
 
 export const requestClientOption: ClientOption<
   DataResponse<any>,
@@ -44,17 +56,25 @@ export const requestClientOption: ClientOption<
     timeout,
   },
   requestChain: [
-    new UpdateAuthHeaderPlugin(function () {
+    new ClientRequestAuthHeaderUpdater(function () {
       return authToken.value;
     }),
-    new UpdateExtraHeaderPlugin(function () {
+    new ClientRequestExtraHeaderUpdater(function () {
       return formatHeader.value;
     }),
-    new RequestReplacer(),
+    new RequestReplacer(
+      // replacementIdentifier = BaseRequestReplacer...
+    ),
   ],
   responseChain: [
-    new AuthResponseGuard(),
-    new NetworkErrorResponseGuard(function networkError(error){
+    new AuthResponseGuard(
+      // isUnauthorized
+      // isRequestFromRequestReplacer
+      // isRequestFromAuthClientGuard
+    ),
+    new NetworkErrorResponseGuard(
+      // isNetworkError
+      function networkError(error){
       console.log("detect network error:", error);
     }),
   ],
@@ -76,11 +96,17 @@ export const requestClientOption: ClientOption<
       return null;
     },
     tokenGetter: function () {
+      console.log("tokenGetter:", authToken.value);
       return authToken.value;
     },
     tokenUpdater: function (response: AxiosResponse<any, any>): void {
-      console.log("tokenUpdater:", response);
-      authToken.value = (response.data as any).data.token;
+      try{
+        console.log("tokenUpdater", (response.data as any).data.token)
+        authToken.value = (response.data as any).data.token;
+      }catch(e){
+        console.error("tokenUpdater error, response:", response, "\nerror:", e);
+        throw e;
+      }
     },
     redirect: function (response: AxiosResponse<any, any>) {
       console.log("redirect home");

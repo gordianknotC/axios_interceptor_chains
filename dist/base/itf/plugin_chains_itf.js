@@ -1,6 +1,34 @@
+import { LogModules } from "../../setup/logger.setup";
 import { ensureCanProcessFulFill, ensureCanReject } from "../../utils/common_utils";
-import { assert } from "@gdknot/frontend_common";
+import { assert, Logger } from "@gdknot/frontend_common";
+const D = new Logger(LogModules.Plugin);
+var EMethod;
+(function (EMethod) {
+    EMethod["processFulFill"] = "processFulFill";
+    EMethod["canProcessFulFill"] = "canProcessFulFill";
+    EMethod["processReject"] = "processReject";
+    EMethod["canProcessReject"] = "canProcessReject";
+})(EMethod || (EMethod = {}));
 const byPassAll = false;
+function callMethod(chain, input, method) {
+    const ret = chain[method](input);
+    switch (method) {
+        case EMethod.processFulFill:
+            chain._onProcess?.(input);
+            break;
+        case EMethod.canProcessFulFill:
+            chain._onCanProcess?.(input);
+            break;
+        case EMethod.processReject:
+            chain._onProcessReject?.(input);
+            break;
+        case EMethod.canProcessReject:
+            chain._onCanProcessReject?.(input);
+            break;
+        default: break;
+    }
+    return ret;
+}
 //
 //    R E S P O N S E 
 //
@@ -8,8 +36,13 @@ const byPassAll = false;
 export function processResponseFulFill(response, chain) {
     if (!chain)
         return Promise.resolve(response);
-    if (ensureCanProcessFulFill(() => chain.canProcessFulFill(response))) {
-        return chain.processFulFill(response);
+    if (ensureCanProcessFulFill(() => {
+        const canGo = callMethod(chain, response, EMethod.canProcessFulFill);
+        D.info([chain.constructor.name, "Response.canProcessFulFill", response.config.url, response.config.headers, canGo]);
+        return canGo;
+    })) {
+        D.info([chain.constructor.name, "Response.processFulFill", response.config.url, response.config.headers,]);
+        return callMethod(chain, response, EMethod.processFulFill);
     }
     else {
         if (chain.next && chain.canGoNext(response.config)) {
@@ -21,8 +54,14 @@ export function processResponseFulFill(response, chain) {
 export function processResponseReject(error, chain) {
     if (!chain)
         return Promise.reject(error);
-    if (ensureCanReject(() => chain.canProcessReject(error))) {
-        return chain.processReject(error);
+    if (ensureCanReject(() => {
+        const canGo = callMethod(chain, error, EMethod.canProcessReject);
+        D.info([chain.constructor.name, "Response.canProcessReject", error.config?.url, error.config?.headers, , canGo]);
+        return canGo;
+    })) {
+        D.info([chain.constructor.name, "Response.processReject", error.config?.url, error.config?.headers,]);
+        return callMethod(chain, error, EMethod.processReject);
+        ;
     }
     else {
         if (chain.next && chain.canGoNext(error.config)) {
@@ -33,6 +72,7 @@ export function processResponseReject(error, chain) {
 }
 function onResponseFulFilled(chain) {
     return (response) => {
+        D.current(["Start FulFull Response Chain", chain.constructor.name, response.config?.url, "with response:\n", response.data]);
         if (byPassAll)
             return Promise.resolve(response);
         return processResponseFulFill(response, chain);
@@ -40,6 +80,7 @@ function onResponseFulFilled(chain) {
 }
 function onResponseError(chain) {
     return (error) => {
+        D.current(["Start Reject Response Chain", chain.constructor.name, error.config?.url]);
         if (byPassAll)
             return Promise.reject(error.response);
         return processResponseReject(error, chain);
@@ -54,8 +95,13 @@ function onResponseError(chain) {
 export function processRequestFulFill(config, chain) {
     if (!chain)
         return config;
-    if (ensureCanProcessFulFill(() => chain.canProcessFulFill(config))) {
-        return chain.processFulFill(config);
+    if (ensureCanProcessFulFill(() => {
+        const canGo = callMethod(chain, config, EMethod.canProcessFulFill);
+        D.info([chain.constructor.name, "Request.canProcessFulFill", config.url, config.headers, canGo]);
+        return canGo;
+    })) {
+        D.info([chain.constructor.name, "Request.processFulFill", config.url, config.headers,]);
+        return callMethod(chain, config, EMethod.processFulFill);
     }
     else {
         if (chain.next && chain.canGoNext(config))
@@ -66,11 +112,13 @@ export function processRequestFulFill(config, chain) {
 export function processRequestReject(error, chain) {
     if (!chain)
         return Promise.reject(error);
-    if (ensureCanReject(() => chain.canProcessReject(error))) {
-        return chain.processReject(error).catch((e) => {
-            console.error("catch on processError", e);
-            return Promise.reject(e);
-        });
+    if (ensureCanReject(() => {
+        const canGo = callMethod(chain, error, EMethod.canProcessReject);
+        D.info([chain.constructor.name, "Request.canProcessReject", chain.constructor.name, error.config?.url, error.config?.headers, canGo]);
+        return canGo;
+    })) {
+        D.info([chain.constructor.name, "Request.processReject", chain.constructor.name, error.config?.url, error.config?.headers]);
+        return callMethod(chain, error, EMethod.processReject);
     }
     else {
         if (chain.next && chain.canGoNext(error.config))
@@ -80,6 +128,7 @@ export function processRequestReject(error, chain) {
 }
 function onRequestFulFilled(chain) {
     return (config) => {
+        D.current(["Start FulFull Request Chain", chain.constructor.name, config?.url]);
         if (byPassAll)
             return config;
         return processRequestFulFill(config, chain);
@@ -87,11 +136,18 @@ function onRequestFulFilled(chain) {
 }
 function onRequestError(chain) {
     return (error) => {
+        D.current(["Start Reject Request Chain", chain.constructor.name, error.config?.url, error.config?.headers]);
         if (byPassAll)
             return Promise.reject(error.response);
         return processRequestReject(error, chain);
     };
 }
+// export abstract class PluginChainActionRegistry {
+//   abstract name: string;
+//   abstract requestAction: (request: AxiosRequestConfig)=> void;
+//   abstract requestAction: (request: AxiosRequestConfig)=> void;
+//   abstract requestAction: (request: AxiosRequestConfig)=> void;
+// }
 /**
  * {@inheritdoc BaseClientServicesPluginChains}
  * @typeParam INPUT -  process function 的輸入型別
@@ -161,6 +217,38 @@ export class BaseClientServicesPluginChains {
     /** default: true */
     canProcessReject(error) {
         return true;
+    }
+    onProcess(cb, terminateAfterCall = true) {
+        this._onProcess = () => {
+            cb();
+            if (terminateAfterCall) {
+                this._onProcess = undefined;
+            }
+        };
+    }
+    onProcessReject(cb, terminateAfterCall = true) {
+        this._onProcessReject = () => {
+            cb();
+            if (terminateAfterCall) {
+                this._onCanProcess = undefined;
+            }
+        };
+    }
+    onCanProcess(cb, terminateAfterCall = true) {
+        this._onCanProcess = () => {
+            cb();
+            if (terminateAfterCall) {
+                this._onCanProcess = undefined;
+            }
+        };
+    }
+    onCanProcessReject(cb, terminateAfterCall = true) {
+        this._onCanProcessReject = () => {
+            cb();
+            if (terminateAfterCall) {
+                this._onCanProcessReject = undefined;
+            }
+        };
     }
     init(client) {
         this.client = client;

@@ -1,3 +1,4 @@
+import { assert } from "console";
 import { BaseClientServicesPluginChains, processRequestFulFill, processRequestReject, } from "../itf/plugin_chains_itf";
 /**
  * {@inheritdoc BaseClientServicesPluginChains}
@@ -5,6 +6,10 @@ import { BaseClientServicesPluginChains, processRequestFulFill, processRequestRe
 export class BaseClientServiceRequestPlugin extends BaseClientServicesPluginChains {
     constructor() {
         super();
+        assert(() => this.assertCanAssemble() == undefined, ``);
+    }
+    assertCanAssemble() {
+        return "";
     }
     canGoNext(config) {
         return super.canGoNext(config);

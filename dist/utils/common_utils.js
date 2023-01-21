@@ -10,7 +10,7 @@ export function ensureNoRaise(action, defaults) {
         return action();
     }
     catch (e) {
-        console.warn(`catch error on`, e);
+        // console.warn(`catch error on`, e);
         return defaults(e);
     }
 }

@@ -19,6 +19,9 @@ export class AuthClientResponseGuard
   get isFetched(): boolean{
     return this.client!.hostClient!.stage == EClientStage.authFetched;
   }
+  get isUpdated(): boolean{
+    return this.client!.hostClient!.stage == EClientStage.authUpdated;
+  }
   get hasQueue(): boolean{
     return !this.client!.hostClient!.queue.isEmpty;
   }
@@ -30,5 +33,19 @@ export class AuthClientResponseGuard
   }
   constructor() {
     super();
+  }
+}
+export class AuthClientStageMarker extends AuthClientResponseGuard{
+  canProcessFulFill(config: AxiosResponse<any, any>): boolean {
+    return false;
+  }
+  canProcessReject(error: AxiosError<unknown, any>): boolean {
+    return false;
+  }
+  processFulFill(response: AxiosResponse<any, any>): Promise<AxiosResponse<any, any>> {
+    throw new UnExpectedError("");
+  }
+  processReject(error: AxiosError<unknown, any>): Promise<AxiosResponse<any, any> | AxiosError<unknown, any>> {
+    throw new UnExpectedError("");
   }
 }

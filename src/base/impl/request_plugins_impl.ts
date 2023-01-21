@@ -1,4 +1,5 @@
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import { assert } from "console";
 import { IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain } from "../itf/client_itf";
 import {
   BaseClientServicesPluginChains,
@@ -22,6 +23,10 @@ export abstract class BaseClientServiceRequestPlugin<
 {
   constructor() {
     super();
+    assert(()=>this.assertCanAssemble() == undefined, ``);
+  }
+  assertCanAssemble(): string | undefined {
+    return "";
   }
   canGoNext(config: AxiosRequestConfig): boolean {
     return super.canGoNext(config);

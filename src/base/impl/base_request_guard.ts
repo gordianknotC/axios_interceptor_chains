@@ -1,9 +1,11 @@
 import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
 import { BaseClientServiceRequestPlugin } from "@/base/impl/request_plugins_impl";
 import { IBaseClient } from "@/base/itf/client_itf";
-import { NotImplementedError } from "@gdknot/frontend_common";
+import { Logger, NotImplementedError } from "@gdknot/frontend_common";
 import { AxiosError, AxiosRequestConfig, AxiosHeaders } from "axios";
+import { LogModules } from "@/setup/logger.setup";
 
+const D = new Logger(LogModules.HeaderUpdater)
 export type AxiosHeaderValue =
   | AxiosHeaders
   | string
@@ -75,6 +77,7 @@ export class BaseRequestHeaderGuard<
     const header = config.headers as AxiosHeaders;
     const appendedHeader = this.appendRequestHeader();
     header.set(appendedHeader);
+    D.info(["update header:", appendedHeader, "new header:", header])
     return super.processFulFill(config);
   }
 }

@@ -1,5 +1,4 @@
-import { BaseRequestReplacer } from "../base/impl/base_request_replacer_impl";
-import { wait } from "../utils/common_utils";
+import { BaseRequestReplacer } from "../base/impl/base_request_replacer";
 /**
  * {@inheritdoc BaseRequestReplacer}
  * 用來取代當前的 request, @see {@link BaseRequestReplacer}
@@ -9,16 +8,6 @@ import { wait } from "../utils/common_utils";
 export class RequestReplacer extends BaseRequestReplacer {
     canProcessFulFill(config) {
         return super.canProcessFulFill(config);
-    }
-    newRequest(config) {
-        const timeout = this.client.axios.defaults.timeout ?? 10 * 1000;
-        const completer = this.client?.queue.enqueueWithoutId(() => {
-            // 等待其他 plugin 清除
-            return wait(timeout);
-        });
-        const queueItem = completer._meta;
-        queueItem.meta = { requestConfig: config };
-        return completer.future;
     }
 }
 //# sourceMappingURL=request_replacer.js.map

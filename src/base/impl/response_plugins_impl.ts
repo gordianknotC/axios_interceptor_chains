@@ -1,3 +1,4 @@
+import { assert } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosResponse } from "axios";
 import { IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain } from "../itf/client_itf";
 import {
@@ -5,6 +6,8 @@ import {
   processResponseFulFill,
   processResponseReject,
 } from "../itf/plugin_chains_itf";
+
+
 
 
 /** 所有 response chain 均繼承 {@link BaseClientServiceResponsePlugin} */
@@ -16,6 +19,15 @@ export abstract class BaseClientServiceResponsePlugin<
     Promise<AxiosResponse>,
     CLIENT
 > {
+
+  constructor(){
+    super();
+    assert(()=>this.assertCanAssemble() == undefined, ``);
+  }
+
+  assertCanAssemble(): string | undefined {
+    return undefined;
+  }
   /** 
    * 決定是否能夠進行 next chain
    * @returns - default: true */
@@ -54,6 +66,6 @@ export abstract class BaseClientServiceResponsePlugin<
    * - 若 Promise.resolve, axios不返回錯
    */
   processReject(error: AxiosError): Promise<AxiosError | AxiosResponse> {
-    return processResponseReject(error, this.next);
+    return  processResponseReject(error, this.next);
   }
 }

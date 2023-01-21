@@ -1,4 +1,4 @@
-import { BaseRequestHeaderGuard } from "../base/impl/base_request_guard_impl";
+import { BaseRequestHeaderGuard } from "../base/impl/base_request_guard";
 import { AxiosHeaders } from "axios";
 export type AxiosHeaderValue = AxiosHeaders | string | string[] | number | boolean | null;
 export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;
@@ -12,9 +12,9 @@ export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;
   ];
   ```
  */
-export declare class UpdateAuthHeaderPlugin<RESPONSE, ERROR, SUCCESS> extends BaseRequestHeaderGuard<RESPONSE, ERROR, SUCCESS> {
+export declare class ClientRequestAuthHeaderUpdater<RESPONSE, ERROR, SUCCESS> extends BaseRequestHeaderGuard<RESPONSE, ERROR, SUCCESS> {
     /** 使用者自定義 AuthToken 參照*/
-    private tokenGetter;
+    tokenGetter: () => string;
     constructor(
     /** 使用者自定義 AuthToken 參照*/
     tokenGetter: () => string);
@@ -25,7 +25,7 @@ export declare class UpdateAuthHeaderPlugin<RESPONSE, ERROR, SUCCESS> extends Ba
     */
     protected appendRequestHeader(): RawAxiosHeaders;
 }
-export declare class UpdateExtraHeaderPlugin<RESPONSE, ERROR, SUCCESS> extends BaseRequestHeaderGuard<RESPONSE, ERROR, SUCCESS> {
+export declare class ClientRequestExtraHeaderUpdater<RESPONSE, ERROR, SUCCESS> extends BaseRequestHeaderGuard<RESPONSE, ERROR, SUCCESS> {
     private headerGetter;
     constructor(headerGetter: () => RawAxiosHeaders);
     /**

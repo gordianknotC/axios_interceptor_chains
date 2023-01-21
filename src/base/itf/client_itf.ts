@@ -1,4 +1,4 @@
-import { AsyncQueue } from "@gdknot/frontend_common";
+import { AsyncQueue, Completer } from "@gdknot/frontend_common";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { BaseClientServicesPluginChains } from "./plugin_chains_itf";
 
@@ -28,7 +28,7 @@ export type QueueRequest = {
 };
 
 /** client 初始化時所注入與 authorization 相關的設定 */
-export type ClientAuthOption = AxiosRequestConfig & {
+export type ClientAuthOption =  {
   /** 創建一般性的 axios instance 所需的 Config，用於非 auth token 換發的請求*/
   axiosConfig: AxiosRequestConfig;
   /** axios.interceptors.request 以責任鍊方式實作 */
@@ -168,6 +168,8 @@ export abstract class IBaseAuthClient<
     Promise<AxiosResponse<any, any>>,
     any
   >[];
+  abstract get callInterval(): number;
+  abstract get canAuth(): boolean;
   abstract queue: AsyncQueue<QUEUE>;
   /** authorization 專用 axios instance, 不走 request/response interceptors */
   abstract axios: AxiosInstance;
@@ -177,9 +179,8 @@ export abstract class IBaseAuthClient<
   abstract markUpdated(): void;
   abstract hostClient?: IBaseClient<DATA, ERROR, SUCCESS, QUEUE>;
   /** 加上 debounce 功能後專門用來請求 auth request 的方法, 防止短時間重複換發 auth token */
-  abstract requester?: (() => Promise<DATA | ERROR | SUCCESS>) & {
-    clear: () => void;
-  };
+  abstract requester?:(() => Promise<DATA | ERROR | SUCCESS>) | undefined;
+  abstract authCompleter?: Completer<any>;
 }
 
 /**  api client service

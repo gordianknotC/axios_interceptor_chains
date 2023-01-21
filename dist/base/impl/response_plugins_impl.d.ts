@@ -3,6 +3,8 @@ import { IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain } fr
 import { BaseClientServicesPluginChains } from "../itf/plugin_chains_itf";
 /** 所有 response chain 均繼承 {@link BaseClientServiceResponsePlugin} */
 export declare abstract class BaseClientServiceResponsePlugin<CLIENT extends IBaseClientResponsibilityChain & IBaseClientProperties<any> = IBaseClient<any, any, any>> extends BaseClientServicesPluginChains<AxiosResponse, Promise<AxiosResponse>, CLIENT> {
+    constructor();
+    assertCanAssemble(): string | undefined;
     /**
      * 決定是否能夠進行 next chain
      * @returns - default: true */

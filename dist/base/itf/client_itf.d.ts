@@ -1,11 +1,13 @@
-import { AsyncQueue } from "@gdknot/frontend_common";
+import { AsyncQueue, Completer } from "@gdknot/frontend_common";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { BaseClientServicesPluginChains } from "./plugin_chains_itf";
 /** 代表 client 當前的狀態表示, idle/fetching/authorizing*/
 export declare enum EClientStage {
     idle = "idle",
     fetching = "fetching",
-    authorizing = "authorizing"
+    authorizing = "authorizing",
+    authFetched = "authFetched",
+    authUpdated = "authUpdated"
 }
 export type RedirectAction = {
     /** redirect 如返回 true － clear Queue */
@@ -16,7 +18,7 @@ export type QueueRequest = {
     requestConfig: AxiosRequestConfig;
 };
 /** client 初始化時所注入與 authorization 相關的設定 */
-export type ClientAuthOption = AxiosRequestConfig & {
+export type ClientAuthOption = {
     /** 創建一般性的 axios instance 所需的 Config，用於非 auth token 換發的請求*/
     axiosConfig: AxiosRequestConfig;
     /** axios.interceptors.request 以責任鍊方式實作 */
@@ -83,15 +85,19 @@ export declare abstract class IBaseClientProperties<OPTION, QUEUE extends QueueR
 export declare abstract class IBaseAuthClient<DATA, ERROR, SUCCESS, QUEUE extends QueueRequest = QueueRequest> implements IBaseClientResponsibilityChain, IBaseClientProperties<ClientAuthOption, QUEUE> {
     abstract requestChain: BaseClientServicesPluginChains<AxiosRequestConfig<any>, AxiosRequestConfig<any>, any>[];
     abstract responseChain: BaseClientServicesPluginChains<AxiosResponse<any, any>, Promise<AxiosResponse<any, any>>, any>[];
+    abstract get callInterval(): number;
+    abstract get canAuth(): boolean;
     abstract queue: AsyncQueue<QUEUE>;
     /** authorization 專用 axios instance, 不走 request/response interceptors */
     abstract axios: AxiosInstance;
     abstract option: ClientAuthOption;
+    abstract markIdle(): void;
+    abstract markFetched(): void;
+    abstract markUpdated(): void;
     abstract hostClient?: IBaseClient<DATA, ERROR, SUCCESS, QUEUE>;
     /** 加上 debounce 功能後專門用來請求 auth request 的方法, 防止短時間重複換發 auth token */
-    abstract requester?: (() => Promise<DATA | ERROR | SUCCESS>) & {
-        clear: () => void;
-    };
+    abstract requester?: (() => Promise<DATA | ERROR | SUCCESS>) | undefined;
+    abstract authCompleter?: Completer<any>;
 }
 /**  api client service
  * @typeParam DATA - response 型別

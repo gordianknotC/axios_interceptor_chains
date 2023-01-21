@@ -8,18 +8,15 @@ export function wait (span: number): Promise<boolean>{
     });
   }
 
-
 export
 function ensureNoRaise<T>(action: ()=> T, defaults: (error?: any)=> T): T{
   try{
     return action();
   }catch(e){
-    console.warn(`catch error on`, e);
+    // console.warn(`catch error on`, e);
     return defaults(e);
   } 
 }
-
-
 
 export
 function ensureCanProcessFulFill(action: ()=>boolean): boolean{

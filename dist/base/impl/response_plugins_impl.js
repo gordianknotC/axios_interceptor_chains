@@ -1,6 +1,14 @@
+import { assert } from "@gdknot/frontend_common";
 import { BaseClientServicesPluginChains, processResponseFulFill, processResponseReject, } from "../itf/plugin_chains_itf";
 /** 所有 response chain 均繼承 {@link BaseClientServiceResponsePlugin} */
 export class BaseClientServiceResponsePlugin extends BaseClientServicesPluginChains {
+    constructor() {
+        super();
+        assert(() => this.assertCanAssemble() == undefined, ``);
+    }
+    assertCanAssemble() {
+        return undefined;
+    }
     /**
      * 決定是否能夠進行 next chain
      * @returns - default: true */

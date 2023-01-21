@@ -6,9 +6,10 @@ export enum EModules {
   Client="Client",
   AuthGuard="AuthGuard",
   AuthClient="AuthClient",
-  RequestRep="RequestReplacer",
+  RequestReplacer="RequestReplacer",
   HeaderUpdater="HeaderUpdater",
   Plugin="Plugin",
+  Test="Test"
 }
 
 export function logger(module: AllowedModule<EModules>): Logger<EModules>{
@@ -22,10 +23,11 @@ const ClientModule: AllowedModule<EModules> = {
 
 const modules = [
   ClientModule,
+  {...ClientModule, moduleName: EModules.Test},
   {...ClientModule, moduleName: EModules.AuthGuard},
   {...ClientModule, moduleName: EModules.AuthClient},
   {...ClientModule, moduleName: EModules.Plugin},
-  {...ClientModule, moduleName: EModules.RequestRep},
+  {...ClientModule, moduleName: EModules.RequestReplacer},
   {...ClientModule, moduleName: EModules.HeaderUpdater}
 ];
 

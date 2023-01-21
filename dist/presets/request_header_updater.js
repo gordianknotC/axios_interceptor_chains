@@ -1,4 +1,5 @@
-import { BaseRequestHeaderGuard } from "../base/impl/base_request_guard_impl";
+import { BaseRequestHeaderGuard } from "../base/impl/base_request_guard";
+import { assert } from "console";
 /** 自動將 axios request config 寫入正確的 authorization header
  * @example
  * ```ts
@@ -9,7 +10,7 @@ import { BaseRequestHeaderGuard } from "../base/impl/base_request_guard_impl";
   ];
   ```
  */
-export class UpdateAuthHeaderPlugin extends BaseRequestHeaderGuard {
+export class ClientRequestAuthHeaderUpdater extends BaseRequestHeaderGuard {
     constructor(
     /** 使用者自定義 AuthToken 參照*/
     tokenGetter) {
@@ -22,12 +23,13 @@ export class UpdateAuthHeaderPlugin extends BaseRequestHeaderGuard {
      * 如要放複雜的物件得轉成 json, 並寫於 header 寫入 json 型別
     */
     appendRequestHeader() {
+        assert(() => this.tokenGetter() != undefined, "unexpected tokenGetter returns");
         return {
             Authorization: this.tokenGetter(),
         };
     }
 }
-export class UpdateExtraHeaderPlugin extends BaseRequestHeaderGuard {
+export class ClientRequestExtraHeaderUpdater extends BaseRequestHeaderGuard {
     constructor(headerGetter) {
         super();
         this.headerGetter = headerGetter;

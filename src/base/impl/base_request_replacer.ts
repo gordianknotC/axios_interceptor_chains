@@ -4,9 +4,12 @@ import {
   EClientStage,
   IBaseClient,
 } from "@/base/itf/client_itf";
-import { assert, NotImplementedError } from "@gdknot/frontend_common";
+import { assert, Logger, NotImplementedError } from "@gdknot/frontend_common";
 import axios, { AxiosError, AxiosRequestConfig, AxiosHeaders } from "axios";
 import { BaseRequestGuard } from "./base_request_guard";
+import { LogModules } from "@/setup/logger.setup";
+
+const D = new Logger(LogModules.RequestReplacer);
 
 /** 
  * {@inheritdoc BaseRequestGuard}
@@ -35,12 +38,35 @@ export class BaseRequestReplacer<
 > {
 
   /** 當request 進行取代持會 raise 這個 exception */
-  static errorMessageForReplacement: string = "BaseRequestReplacer.replaceRequest";
+  static configActionName: string = "BaseRequestReplacer.replaceRequest";
+
+  protected switchIntoRejectResponse(axiosError: AxiosError){
+    return Promise.reject(axiosError) as any;
+  }
+
+  protected error(config: AxiosRequestConfig<any>): AxiosError{
+    const axiosError: AxiosError = {
+      isAxiosError: false,
+      toJSON: function (): object {
+        return axiosError;
+      },
+      name: BaseRequestReplacer.configActionName,
+      message: BaseRequestReplacer.configActionName,
+      config
+    }
+    D.current(["throw error:", BaseRequestReplacer.configActionName]);
+    // (config as any).headers["__chain_action__"] = BaseRequestReplacer.configActionName;
+    return axiosError;
+  }
 
   /** 
    * 當 {@link canProcessFulFill} 為 true 則可以進行 {@link processFulFill}，這裡 
    * {@link canProcessFulFill} 只處理當 client 狀態為 {@link EClientStage.authorizing} 時，
    * 代表client正處於換發 authorization token， 這時應處理所有進來的 request, 替代成 pending 
+   * @returns - 
+   * ```ts
+   * this.client!.stage == EClientStage.authorizing
+   * ```
    * */
   canProcessFulFill(config: AxiosRequestConfig<any>): boolean {
     return this.client!.stage == EClientStage.authorizing;
@@ -51,28 +77,11 @@ export class BaseRequestReplacer<
    * reject進行攔截  
    * */
   processFulFill(config: AxiosRequestConfig<any>): AxiosRequestConfig<any> {
-    const code = undefined;
-    throw new axios.AxiosError(BaseRequestReplacer.errorMessageForReplacement, code, config);
+    return this.switchIntoRejectResponse(this.error(config));
   }
-  /** 
-   * 
-   * @extendSummary - 
-   * 當 {@link canProcessReject} 為 true 則可以進行 {@link processReject}，這裡 
-   * {@link canProcessReject} 只處理當 error.message 為 {@link processFulFill}
-   * 階段為取代 request 所 raise 的 exception {@link BaseRequestReplacer.errorMessageForReplacement}
-  */
+
+  /** false */
   canProcessReject(error: AxiosError<unknown, any>): boolean {
-    return error.message == BaseRequestReplacer.errorMessageForReplacement;
-  }
-  /** 
-   * @extendSummary - 
-   * 以 newRequest 取代 processFulFill 所 raise 的 exception, 並返回給 axios */
-  processReject(error: AxiosError<unknown, any>): Promise<any> {
-    return this.newRequest(error.config!);
-  }
-  /** newRequest 由使用者實作, 迴回新的 Promise 請求，用來替代舊的請求
-   * @param config - 原來的 axios request config */
-  protected newRequest(config: AxiosRequestConfig): Promise<any>{
-    throw new NotImplementedError();
+    return false;
   }
 }

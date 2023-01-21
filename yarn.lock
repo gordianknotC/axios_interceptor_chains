@@ -968,12 +968,14 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@gdknot/frontend_common@0.9.3":
-  version "0.9.3"
-  resolved "https://registry.yarnpkg.com/@gdknot/frontend_common/-/frontend_common-0.9.3.tgz#d8e50c81f1818d050e7cb8bec1f3d0e9286ade10"
-  integrity sha512-o7TjAl2xN9tR1ehpNBc9ybRR9QLjxolP9WEKqe2Z+Qmcp0T4B9YDySRsidXumPNY8OmfJz6NR6h/sStmye+cTA==
+"@gdknot/frontend_common@0.9.9":
+  version "0.9.9"
+  resolved "https://registry.yarnpkg.com/@gdknot/frontend_common/-/frontend_common-0.9.9.tgz#e2ebae401e0463ab3201df675ca61fc629aef457"
+  integrity sha512-EFoDb33IcVIjUOA5bnsVZ858gn93pWy5dB7M/WHFNGodUQMnXgIr+x9nGSGBvuQn6R8vbxg350+ugS3VSL/cKw==
   dependencies:
+    colors "^1.4.0"
     merge-anything "^5.0.4"
+    uuid "^9.0.0"
 
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
@@ -2333,11 +2335,6 @@ date-fns@^2.29.1:
   version "2.29.3"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.29.3.tgz#27402d2fc67eb442b511b70bbdf98e6411cd68a8"
   integrity sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==
-
-debounce@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.1.tgz#38881d8f4166a5c5848020c11827b834bcb3e0a5"
-  integrity sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==
 
 debug@4, debug@^4.0.0, debug@^4.1.0, debug@^4.1.1, debug@^4.3.2, debug@^4.3.4:
   version "4.3.4"
@@ -5142,6 +5139,11 @@ url-parse@^1.5.3:
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
+
+uuid@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"

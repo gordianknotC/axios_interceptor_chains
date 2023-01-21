@@ -31,8 +31,8 @@ export { BaseRequestHeaderGuard } from "./base/impl/base_request_guard";
 //
 //
 export {
-  UpdateAuthHeaderPlugin,
-  UpdateExtraHeaderPlugin,
+  ClientRequestAuthHeaderUpdater as UpdateAuthHeaderPlugin,
+  ClientRequestExtraHeaderUpdater as UpdateExtraHeaderPlugin,
 } from "./presets/request_header_updater";
 
 export { AuthResponseGuard } from "./presets/auth_response_guard";

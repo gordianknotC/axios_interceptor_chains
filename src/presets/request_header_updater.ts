@@ -1,5 +1,6 @@
 import { BaseRequestHeaderGuard } from "@/base/impl/base_request_guard";
 import { AxiosHeaders } from "axios";
+import { assert } from "console";
 
 export type AxiosHeaderValue = AxiosHeaders | string | string[] | number | boolean | null;
 export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;
@@ -15,14 +16,14 @@ export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;
   ];
   ```
  */
-export class UpdateAuthHeaderPlugin<
+export class ClientRequestAuthHeaderUpdater<
   RESPONSE ,
   ERROR,
   SUCCESS
 > extends BaseRequestHeaderGuard<RESPONSE, ERROR, SUCCESS> {
   constructor(
     /** 使用者自定義 AuthToken 參照*/
-    private tokenGetter: ()=>string
+    public tokenGetter: ()=>string
   ){
     super();
   }
@@ -32,13 +33,14 @@ export class UpdateAuthHeaderPlugin<
    * 如要放複雜的物件得轉成 json, 並寫於 header 寫入 json 型別
   */
   protected appendRequestHeader():  RawAxiosHeaders{
+    assert(()=>this.tokenGetter() != undefined, "unexpected tokenGetter returns");
     return {
       Authorization: this.tokenGetter(),
     }
   }
 }
 
-export class UpdateExtraHeaderPlugin<
+export class ClientRequestExtraHeaderUpdater<
   RESPONSE  ,
   ERROR,
   SUCCESS
