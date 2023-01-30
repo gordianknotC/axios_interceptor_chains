@@ -1,9 +1,9 @@
-import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
-import { BaseClientServiceRequestPlugin } from "@/base/impl/request_plugins_impl";
-import { IBaseClient } from "@/base/itf/client_itf";
+import { BaseClientServicesPluginChains } from "~/base/itf/plugin_chains_itf";
+import { BaseClientServiceRequestPlugin } from "~/base/impl/request_plugins_impl";
+import { IBaseClient } from "~/base/itf/client_itf";
 import { ColorConfig, Logger, NotImplementedError } from "@gdknot/frontend_common";
 import { AxiosError, AxiosRequestConfig, AxiosHeaders } from "axios";
-import { LogModules } from "@/setup/logger.setup";
+import { LogModules } from "~/setup/logger.setup";
 
 const D = new Logger(LogModules.HeaderUpdater)
 export type AxiosHeaderValue =

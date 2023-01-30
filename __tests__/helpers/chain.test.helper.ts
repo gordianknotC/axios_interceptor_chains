@@ -1,7 +1,5 @@
-import { ChainActionStage } from "@/base/itf/plugin_chains_itf";
-import { LogModules } from "@/setup/logger.setup";
+import { ChainActionStage } from "~/base/itf/plugin_chains_itf";
 import { ErrorResponse } from "../setup/client.test.setup";
-import { authToken } from "../__mocks__/axios";
 
 const S = (s: any)=>JSON.stringify(s);
 
@@ -136,13 +134,13 @@ export const expectedChainFlow = {
   partial_redirectedAuthorizedGet(data: object, authToken: string, initialToken: string, getUrl: string){
     return [
       {
-        name: `ClientRequestAuthHeaderUpdater.canProcessFulFill`,
+        name: `AuthRequestHeaderUpdater.canProcessFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${initialToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         output: `true`,
         stage: `idle`
       },
       {
-        name: `ClientRequestExtraHeaderUpdater.canProcessFulFill`,
+        name: `ExtraRequestHeaderUpdater.canProcessFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         output: `true`,
         stage: `idle`
@@ -154,13 +152,13 @@ export const expectedChainFlow = {
         stage: `idle`
       },
       {
-        name: `ClientRequestExtraHeaderUpdater.processFulFill`,
+        name: `ExtraRequestHeaderUpdater.processFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         output: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         stage: `idle`
       },
       {
-        name: `ClientRequestAuthHeaderUpdater.processFulFill`,
+        name: `AuthRequestHeaderUpdater.processFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         output: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         stage: `idle`
@@ -182,13 +180,13 @@ export const expectedChainFlow = {
   partial_authorizedGet(data: object, authToken: string, getUrl: string){
     return [
       {
-        name: `ClientRequestAuthHeaderUpdater.canProcessFulFill`,
+        name: `AuthRequestHeaderUpdater.canProcessFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*"}}`,
         output: `true`,
         stage: `fetching`
       },
       {
-        name: `ClientRequestExtraHeaderUpdater.canProcessFulFill`,
+        name: `ExtraRequestHeaderUpdater.canProcessFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}"}}`,
         output: `true`,
         stage: `fetching`
@@ -200,13 +198,13 @@ export const expectedChainFlow = {
         stage: `fetching`
       },
       {
-        name: `ClientRequestExtraHeaderUpdater.processFulFill`,
+        name: `ExtraRequestHeaderUpdater.processFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock"}}`,
         output: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock"}}`,
         stage: `fetching`
       },
       {
-        name: `ClientRequestAuthHeaderUpdater.processFulFill`,
+        name: `AuthRequestHeaderUpdater.processFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock"}}`,
         output: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock"}}`,
         stage: `fetching`
@@ -229,13 +227,13 @@ export const expectedChainFlow = {
     initialAuthToken = initialAuthToken ? `"Authorization":"${initialAuthToken}"` : ""
     return [
       {
-        name: `ClientRequestAuthHeaderUpdater.canProcessFulFill`,
+        name: `AuthRequestHeaderUpdater.canProcessFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*"}}`,
         output: `true`,
         stage: `fetching`
       },
       {
-        name: `ClientRequestExtraHeaderUpdater.canProcessFulFill`,
+        name: `ExtraRequestHeaderUpdater.canProcessFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*",${initialAuthToken}}}`,
         output: `true`,
         stage: `fetching`
@@ -247,13 +245,13 @@ export const expectedChainFlow = {
         stage: `fetching`
       },
       {
-        name: `ClientRequestExtraHeaderUpdater.processFulFill`,
+        name: `ExtraRequestHeaderUpdater.processFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*",${initialAuthToken},"format":"mock"}}`,
         output: `{"headers":{"Accept":"application/json, text/plain, */*",${initialAuthToken},"format":"mock"}}`,
         stage: `fetching`
       },
       {
-        name: `ClientRequestAuthHeaderUpdater.processFulFill`,
+        name: `AuthRequestHeaderUpdater.processFulFill`,
         input: `{"headers":{"Accept":"application/json, text/plain, */*",${initialAuthToken},"format":"mock"}}`,
         output: `{"headers":{"Accept":"application/json, text/plain, */*",${initialAuthToken},"format":"mock"}}`,
         stage: `fetching`

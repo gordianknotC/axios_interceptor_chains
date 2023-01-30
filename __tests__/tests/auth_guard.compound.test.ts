@@ -1,4 +1,4 @@
-import { BaseClient } from "@/base/impl/base_client_impl";
+import { BaseClient } from "~/base/impl/base_client_impl";
 import {
   DataResponse,
   EErrorCode,
@@ -32,8 +32,8 @@ import {
   env,
   RequestAuthRejectStage,
 } from "../helpers/axo.test.helper";
-import { EClientStage } from "@/index";
-import { LogModules } from "@/setup/logger.setup";
+import { EClientStage } from "~/index";
+import { LogModules } from "~/setup/logger.setup";
 import { expectedChainFlow } from "../helpers/chain.test.helper";
 import { rejects } from "assert";
 

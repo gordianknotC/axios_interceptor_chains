@@ -1,10 +1,10 @@
-import { BaseClient } from "@/base/impl/base_client_impl";
-import { BaseAuthResponseGuard } from "@/base/impl/base_auth_response_guard";
-import { AuthResponseGuard } from "@/presets/auth_response_guard";
+import { BaseClient } from "~/base/impl/base_client_impl";
+import { BaseAuthResponseGuard } from "~/base/impl/base_auth_response_guard";
+import { AuthResponseGuard } from "~/presets/auth_response_guard";
 import {
-  ClientRequestAuthHeaderUpdater,
-  ClientRequestExtraHeaderUpdater,
-} from "@/presets/request_header_updater";
+  AuthRequestHeaderUpdater,
+  ExtraRequestHeaderUpdater,
+} from "~/presets/request_header_updater";
 import { formatHeader } from "../setup/client.test.setup";
 import { authToken, EServerResponse, mockAdapter, mockServer, UnauthorizedResponseError } from "../__mocks__/axios";
 import type { AxiosError, AxiosResponse } from "axios";
@@ -16,24 +16,24 @@ import {
   Obj,
   uuidV4,
 } from "@gdknot/frontend_common";
-import { NetworkErrorResponseGuard } from "@/presets/network_error_response_guard";
+import { NetworkErrorResponseGuard } from "~/presets/network_error_response_guard";
 import {
   ACAuthResponseGuard,
   ACFetchedMarker,
   ACIdleMarker,
   ACTokenUpdater,
-} from "@/presets/auth_client_guards";
-import { EClientStage, RequestReplacer } from "@/index";
+} from "~/presets/auth_client_guards";
+import { EClientStage, RequestReplacer } from "~/index";
 import { AnyMxRecord } from "dns";
-import { LogModules } from "@/setup/logger.setup";
+import { LogModules } from "~/setup/logger.setup";
 import axios from "axios";
 import { expectedChainFlow } from "./chain.test.helper";
 
 const D = new Logger(LogModules.Test);
 
 type ClientRequestChain =
-  | ClientRequestExtraHeaderUpdater<any, any, any>
-  | ClientRequestAuthHeaderUpdater<any, any, any>
+  | ExtraRequestHeaderUpdater<any, any, any>
+  | AuthRequestHeaderUpdater<any, any, any>
   | RequestReplacer<any, any, any>;
 type ClientResponseChain = AuthResponseGuard | NetworkErrorResponseGuard;
 type ACRequestChain = undefined;
@@ -58,8 +58,8 @@ enum ChainKind {
   ACIdleMarker = "ACIdleMarker",
   AuthResponseGuard = "AuthResponseGuard",
   NetworkErrorResponseGuard = "NetworkErrorResponseGuard",
-  ClientRequestExtraHeaderUpdater = "ClientRequestExtraHeaderUpdater",
-  ClientRequestAuthHeaderUpdater = "ClientRequestAuthHeaderUpdater",
+  ExtraRequestHeaderUpdater = "ExtraRequestHeaderUpdater",
+  AuthRequestHeaderUpdater = "AuthRequestHeaderUpdater",
   RequestReplacer = "RequestReplacer",
 }
 
@@ -264,17 +264,17 @@ export class AxiosTestHelper {
     ) as any;
   }
   get authHeaderUpdater(): jest.Mocked<
-    ClientRequestAuthHeaderUpdater<any, any, any>
+    AuthRequestHeaderUpdater<any, any, any>
   > {
     return Arr(this.client.requestChain).firstWhere(
-      (_) => _.constructor.name == ClientRequestAuthHeaderUpdater.name
+      (_) => _.constructor.name == AuthRequestHeaderUpdater.name
     ) as any;
   }
   get extraHeaderUpdater(): jest.Mocked<
-    ClientRequestExtraHeaderUpdater<any, any, any>
+    ExtraRequestHeaderUpdater<any, any, any>
   > {
     return Arr(this.client.requestChain).firstWhere(
-      (_) => _.constructor.name == ClientRequestExtraHeaderUpdater.name
+      (_) => _.constructor.name == ExtraRequestHeaderUpdater.name
     ) as any;
   }
   get requestReplacer(): jest.Mocked<RequestReplacer<any, any, any>> {

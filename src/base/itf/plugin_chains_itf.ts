@@ -1,9 +1,7 @@
-import { LogModules } from "@/setup/logger.setup";
-import { ensureCanProcessFulFill, ensureCanReject } from "@/utils/common_utils";
+import { LogModules } from "~/setup/logger.setup";
+import { ensureCanProcessFulFill, ensureCanReject } from "~/utils/common_utils";
 import { Arr, ArrayDelegate, assert, AssertMsg, Logger } from "@gdknot/frontend_common";
 import { Axios, AxiosError, AxiosRequestConfig, AxiosResponse, AxiosResponseHeaders } from "axios";
-import { AnyMxRecord } from "dns";
-import { AxiosConfigHeader } from "../impl/request_plugins_impl";
 import type { ClientAuthOption, ClientOption, IBaseAuthClient, IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain,  } from "./client_itf"
 
 const D = new Logger(LogModules.Plugin);

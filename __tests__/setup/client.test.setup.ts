@@ -1,13 +1,13 @@
 import {
-  ClientRequestAuthHeaderUpdater,
-  ClientRequestExtraHeaderUpdater,
-} from "@/presets/request_header_updater";
-import { AuthResponseGuard } from "@/presets/auth_response_guard";
-import { NetworkErrorResponseGuard } from "@/presets/network_error_response_guard";
+  AuthRequestHeaderUpdater,
+  ExtraRequestHeaderUpdater,
+} from "~/presets/request_header_updater";
+import { AuthResponseGuard } from "~/presets/auth_response_guard";
+import { NetworkErrorResponseGuard } from "~/presets/network_error_response_guard";
 import axios, { Axios, AxiosResponse, AxiosStatic, HttpStatusCode } from "axios";
-import { ClientOption } from "@/base/itf/client_itf";
-import { RequestReplacer } from "@/presets/request_replacer";
-import { ACAuthResponseGuard, ACFetchedMarker, ACIdleMarker, ACTokenUpdater } from "@/presets/auth_client_guards";
+import { ClientOption } from "~/base/itf/client_itf";
+import { RequestReplacer } from "~/presets/request_replacer";
+import { ACAuthResponseGuard, ACFetchedMarker, ACIdleMarker, ACTokenUpdater } from "~/presets/auth_client_guards";
 import { AxiosTestHelper } from "../helpers/axo.test.helper";
 import { authToken, _EErrorCode } from "../__mocks__/axios";
 
@@ -47,10 +47,10 @@ export const requestClientOption: ClientOption<
     timeout,
   },
   requestChain: [
-    new ClientRequestAuthHeaderUpdater(function () {
+    new AuthRequestHeaderUpdater(function () {
       return authToken.value;
     }),
-    new ClientRequestExtraHeaderUpdater(function () {
+    new ExtraRequestHeaderUpdater(function () {
       return formatHeader.value;
     }),
     new RequestReplacer(

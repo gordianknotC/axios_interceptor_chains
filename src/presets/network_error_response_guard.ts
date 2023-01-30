@@ -1,6 +1,6 @@
-import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
-import { BaseClientServiceResponsePlugin } from "@/base/impl/response_plugins_impl";
-import { IBaseClient } from "@/base/itf/client_itf";
+import { BaseClientServicesPluginChains } from "~/base/itf/plugin_chains_itf";
+import { BaseClientServiceResponsePlugin } from "~/base/impl/response_plugins_impl";
+import { IBaseClient } from "~/base/itf/client_itf";
 import { AxiosError, AxiosResponse } from "axios";
 
 

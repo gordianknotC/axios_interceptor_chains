@@ -1,13 +1,10 @@
-import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
-import { AxiosConfigHeader, BaseClientServiceRequestPlugin } from "@/base/impl/request_plugins_impl";
 import {
   EClientStage,
-  IBaseClient,
-} from "@/base/itf/client_itf";
+} from "~/base/itf/client_itf";
 import { assert, Logger, NotImplementedError } from "@gdknot/frontend_common";
 import axios, { AxiosError, AxiosRequestConfig, AxiosHeaders } from "axios";
-import { BaseRequestGuard } from "./base_request_guard";
-import { LogModules } from "@/setup/logger.setup";
+import { LogModules } from "~/setup/logger.setup";
+import { BaseRequestGuard } from "~/base/impl/base_request_guard";
 
 const D = new Logger(LogModules.RequestReplacer);
 

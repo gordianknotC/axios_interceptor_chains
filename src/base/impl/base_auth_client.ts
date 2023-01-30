@@ -1,12 +1,9 @@
 import { EClientStage, IBaseClient as IBaseClient, ClientAuthOption, ClientOption, QueueRequest, IBaseAuthClient } from "../itf/client_itf";
 import { BaseClientServicesPluginChains } from "../itf/plugin_chains_itf";
-import { AxiosError, AxiosHeaders, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import { is, Obj, Queue, assert, AsyncQueue, Logger, Completer } from "@gdknot/frontend_common";
-import debounce from "debounce";
-import { RawAxiosHeaders } from "@/presets/request_header_updater";
-import { timeStamp } from "console";
-import { LogModules } from "@/setup/logger.setup";
+import { LogModules } from "~/setup/logger.setup";
 
 const D = new Logger(LogModules.Client) 
 

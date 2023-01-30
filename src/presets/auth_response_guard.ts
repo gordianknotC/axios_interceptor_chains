@@ -1,18 +1,15 @@
-import { BaseAuthResponseGuard } from "@/base/impl/base_auth_response_guard";
-import { BaseClientServicesPluginChains, ChainActionStage } from "@/base/itf/plugin_chains_itf";
-import { BaseClientServiceResponsePlugin } from "@/base/impl/response_plugins_impl";
+import { BaseAuthResponseGuard } from "~/base/impl/base_auth_response_guard";
+import { BaseClientServicesPluginChains, ChainActionStage } from "~/base/itf/plugin_chains_itf";
+import { BaseClientServiceResponsePlugin } from "~/base/impl/response_plugins_impl";
 import {
-  EClientStage,
   IBaseClient,
-} from "@/base/itf/client_itf";
-import { wait } from "@/utils/common_utils";
+} from "~/base/itf/client_itf";
 import { Completer, QueueItem, UnExpectedError } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
-import { AuthClientResponseGuard } from "@/base/impl/base_auth_client_response_guard";
-import { BaseRequestReplacer, RequestReplacer } from "..";
-import { ACAuthResponseGuard } from "./auth_client_guards";
-import { ErrorResponse } from "@/../__tests__/setup/client.test.setup";
+import { RequestReplacer } from "~/presets/request_replacer";
+import { ACAuthResponseGuard } from "~/presets/auth_client_guards";
+
 
 
 

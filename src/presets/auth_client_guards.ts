@@ -1,14 +1,12 @@
 import {
   EClientStage,
-  IBaseClient,
   QueueRequest,
-} from "@/base/itf/client_itf";
+} from "~/base/itf/client_itf";
 import { Completer, Logger, QueueItem, UnExpectedError } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
-import { AuthClientResponseGuard, AuthClientStageMarker } from "@/base/impl/base_auth_client_response_guard";
-import { LogModules } from "@/setup/logger.setup";
-import { assert } from "console";
+import { AuthClientResponseGuard, AuthClientStageMarker } from "~/base/impl/base_auth_client_response_guard";
+import { LogModules } from "~/setup/logger.setup";
 
 const D = new Logger(LogModules.AuthClient);
 

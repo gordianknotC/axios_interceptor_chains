@@ -1,6 +1,6 @@
-import {  BaseRequestReplacer } from "@/base/impl/base_request_replacer";
-import { QueueRequest } from "@/base/itf/client_itf";
-import { wait } from "@/utils/common_utils";
+import {  BaseRequestReplacer } from "~/base/impl/base_request_replacer";
+import { QueueRequest } from "~/base/itf/client_itf";
+import { wait } from "~/utils/common_utils";
 import { Completer, QueueItem } from "@gdknot/frontend_common";
 import { AxiosError, AxiosHeaders, AxiosRequestConfig, AxiosResponse } from "axios";
 

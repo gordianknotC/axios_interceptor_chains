@@ -3,7 +3,6 @@ import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain } from "../itf/client_itf";
 import {
   BaseClientServicesPluginChains,
-  ChainActionStage,
   processResponseFulFill,
   processResponseReject,
 } from "../itf/plugin_chains_itf";

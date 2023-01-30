@@ -1,4 +1,4 @@
-import { BaseRequestHeaderGuard } from "@/base/impl/base_request_guard";
+import { BaseRequestHeaderGuard } from "~/base/impl/base_request_guard";
 import { AxiosHeaders } from "axios";
 import { assert } from "console";
 
@@ -16,7 +16,7 @@ export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;
   ];
   ```
  */
-export class ClientRequestAuthHeaderUpdater<
+export class AuthRequestHeaderUpdater<
   RESPONSE ,
   ERROR,
   SUCCESS
@@ -40,7 +40,7 @@ export class ClientRequestAuthHeaderUpdater<
   }
 }
 
-export class ClientRequestExtraHeaderUpdater<
+export class ExtraRequestHeaderUpdater<
   RESPONSE  ,
   ERROR,
   SUCCESS

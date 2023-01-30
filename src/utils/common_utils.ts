@@ -1,4 +1,3 @@
-import { AllowedModule } from "@gdknot/frontend_common";
 
 export function wait (span: number): Promise<boolean>{
     return new Promise(resolve =>{

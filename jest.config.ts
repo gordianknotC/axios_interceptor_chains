@@ -18,8 +18,8 @@ const jestConfig: JestConfigWithTsJest = {
   modulePaths: ["<rootDir>/src"],
   moduleDirectories: ["node_modules"],
   moduleNameMapper: {
-    "@/(.*)": ["<rootDir>/src/$1"],
-    "~/(.*)": ["<rootDir>/src/$1"]
+    "~/(.*)": ["<rootDir>/src/$1"],
+    "@/(.*)": ["<rootDir>/src/$1"]
   },
   globals: {},
   setupFilesAfterEnv: ["jest-expect-message"]

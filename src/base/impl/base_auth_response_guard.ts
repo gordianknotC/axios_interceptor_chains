@@ -1,5 +1,5 @@
-import { LogModules } from "@/setup/logger.setup";
-import { wait } from "@/utils/common_utils";
+import { LogModules } from "~/setup/logger.setup";
+import { wait } from "~/utils/common_utils";
 import { AsyncQueue, Completer, Logger, NotImplementedError, QueueItem, UnExpectedError } from "@gdknot/frontend_common";
 import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 import { IBaseClient, EClientStage, QueueRequest, IBaseAuthClient } from "../itf/client_itf";

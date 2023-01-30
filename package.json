@@ -1,9 +1,9 @@
 {
   "name": "@gdknot/request_client",
-  "version": "0.0.",
+  "version": "0.0.11",
   "description": "axios interceptors implemented as responsibility chain",
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "clear && tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "build:watch": "concurrently --kill-others \"tsc --project tsconfig.build.json && tsc-alias -w -p tsconfig.build.json\"",
     "serve": "vue-cli-service serve",
     "test": "jest",
@@ -23,15 +23,15 @@
     "dist",
     "tsconfig.json"
   ],
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/src/index.js",
+  "module": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "notes": {
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
     "repository": {
       "type": "git",
       "url": "git+https://github.com/gordianknotC/jsUtil.git"

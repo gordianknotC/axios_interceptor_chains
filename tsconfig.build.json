@@ -1,17 +1,72 @@
 {
-  "extends": "./tsconfig.json",
+  "buildOnSave": false,
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "src",
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "diagnostics": true,
+    "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "jsx": "preserve",
+    "jsxFactory": "h" /* Specify the JSX factory function to use when targeting react JSX emit, e.g. React.createElement or h. */,
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "moduleResolution": "node",
+    /**
+    You shouldn't use "noEmit": true in your tsconfig.json if you compile with tsc.
+    From compiler options description --noEmit - Do not emit outputs.*/
+    "noEmit": false,
+    "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,
+    "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
+    "noImplicitThis": true /* Raise error on 'this' expressions with an implied 'any' type. */,
+    "outDir": "dist" /* Redirect output structure to the directory. */,
+    "paths": {
+      "@/*": [
+        "*"
+      ],
+      /*
+       *     A L I A S   P A T H
+       *     需要同時設置 vue.config.js - alias
+       **/
+      "~/*": [
+        "*"
+      ]
+    },
+    "rootDirs": [
+      "src"
+    ],
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "module": "CommonJS",
+    "target": "ES2018",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ] 
+  },
+  
   "exclude": [
     "node_modules",
+    "dist",
     ".vite-storybook",
     "storybook-static",
-    "__tests__"
-  ], 
-  "include": [
-    "@types",
-    "src",
-    "src/index.ts",
-    "src/**/*.ts",
-    "src/index.ts",
-    "jest.d.ts"
+    "__tests__",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx",
+    "__tests__/*.tsx",
+    "__tests__/*.ts",
   ],
+  "include": [
+    "src",
+  ],
+  "files": ["node_modules/jest-expect-message/types/index.d.ts"],
 }

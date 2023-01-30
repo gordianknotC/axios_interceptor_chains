@@ -31,12 +31,12 @@ yarn serve:doc
 import {
   UpdateAuthHeaderPlugin,
   UpdateExtraHeaderPlugin,
-} from "@/presets/request_header_updater";
-import { AuthResponseGuard } from "@/presets/auth_response_guard";
-import { NetworkErrorResponseGuard } from "@/presets/network_error_response_guard";
+} from "~/presets/request_header_updater";
+import { AuthResponseGuard } from "~/presets/auth_response_guard";
+import { NetworkErrorResponseGuard } from "~/presets/network_error_response_guard";
 import { AxiosResponse } from "axios";
-import { ClientOption } from "@/base/impl/client_impl";
-import { RequestReplacer } from "@/presets/request_replacer";
+import { ClientOption } from "~/base/impl/client_impl";
+import { RequestReplacer } from "~/presets/request_replacer";
 
 
 export type DataResponse<T> = { 

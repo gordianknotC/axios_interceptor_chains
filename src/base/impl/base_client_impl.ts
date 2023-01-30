@@ -3,11 +3,9 @@ import { BaseClientServicesPluginChains } from "../itf/plugin_chains_itf";
 import { AxiosError, AxiosHeaders, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import { is, Obj, Queue, assert, AsyncQueue, Logger } from "@gdknot/frontend_common";
-import debounce from "debounce";
-import { RawAxiosHeaders } from "@/presets/request_header_updater";
-import { timeStamp } from "console";
-import { LogModules } from "@/setup/logger.setup";
-import { BaseAuthClient } from "./base_auth_client";
+import { RawAxiosHeaders } from "~/presets/request_header_updater";
+import { LogModules } from "~/setup/logger.setup";
+import { BaseAuthClient } from "~/base/impl/base_auth_client";
 
 const D = new Logger(LogModules.Client) 
 

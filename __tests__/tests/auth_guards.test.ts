@@ -1,11 +1,11 @@
-import { BaseClient } from '@/base/impl/base_client_impl';
+import { BaseClient } from '~/base/impl/base_client_impl';
 import { DataResponse, EErrorCode, ErrorResponse, formatHeader, requestClientOption, SuccessResponse } from '../setup/client.test.setup';
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import mockAxios, { authToken, AuthTokenExpiredError, EServerResponse, getMockAxiosInstances, mockAdapter, mockServer, UnauthorizedResponseError } from '../__mocks__/axios';
 import { Arr, Completer, Logger } from '@gdknot/frontend_common';
 import { AxiosTestHelper, ChainCondition, env, RequestAuthRejectStage } from '../helpers/axo.test.helper';
-import { EClientStage } from '@/index';
-import { LogModules } from '@/setup/logger.setup';
+import { EClientStage } from '~/index';
+import { LogModules } from '~/setup/logger.setup';
 import { expectedChainFlow } from '../helpers/chain.test.helper';
 import { rejects } from 'assert';
 
