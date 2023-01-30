@@ -129,7 +129,7 @@ class MockedServer {
     url: string, 
     responseCB: ()=>Promise<any>, 
     useValidator: boolean = true, 
-    status: HttpStatusCode = HttpStatusCode.Ok
+    status: HttpStatusCode = axios.HttpStatusCode.Ok
   ) {
     assert(()=>typeof responseCB == "function", "invalid type");
     this.registry[url] = merge(this.defaultResponse, {

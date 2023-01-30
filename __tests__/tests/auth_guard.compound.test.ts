@@ -25,11 +25,11 @@ import {
   Arr,
   Completer,
   Logger,
-  setupCurrentEnv,
 } from "@gdknot/frontend_common";
 import {
   AxiosTestHelper,
   ChainCondition,
+  env,
   RequestAuthRejectStage,
 } from "../helpers/axo.test.helper";
 import { EClientStage } from "@/index";
@@ -67,7 +67,6 @@ describe("AuthGuard", () => {
       instances = getMockAxiosInstances();
       axiosInstance = Arr(instances).last;
       jest.clearAllMocks();
-      setupCurrentEnv("test");
     });
 
     test("expect a simple get call get passed", async () => {
@@ -124,12 +123,6 @@ describe("AuthGuard", () => {
       const expect2 = { data: { username: "expect2" } };
       const payload = {};
       const terminate = true;
-      const errorResponse = {
-        message: "Unauthorized",
-        error_name: "Unauthorized",
-        error_code: 401,
-        error_key: "Unauthorized",
-      };
       authToken.value = "helloworld";
 
       mockServer.registerResponse(
@@ -201,12 +194,6 @@ describe("AuthGuard", () => {
       const expect4 = { data: { username: "expect4" } };
       const payload = {};
       const terminate = true;
-      const errorResponse = {
-        message: "Unauthorized",
-        error_name: "Unauthorized",
-        error_code: 401,
-        error_key: "Unauthorized",
-      };
       authToken.value = "helloworld";
       mockServer.registerResponse(
         helper.client.authClient?.option.axiosConfig.url!,

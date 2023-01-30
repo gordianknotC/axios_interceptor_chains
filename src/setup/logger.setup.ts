@@ -58,3 +58,7 @@ export const LogModules = Logger.setLoggerAllowanceByEnv({
   test: modules,
   develop: modules
 })
+
+Logger.setCurrentEnv(()=>{
+  return "production";
+});

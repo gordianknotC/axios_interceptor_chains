@@ -42,6 +42,7 @@ export class NetworkErrorResponseGuard
    */
   processReject(error: AxiosError<unknown, any>): Promise<any> {
     this.networkErrorHandler(error);
+    return this.reject(error);
     return super.processReject(error);
   }
 }

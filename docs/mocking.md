@@ -2,7 +2,7 @@
 
 
 <!--#-->
-### Mock Axios Adapter
+### How to Mock Axios Adapter
 axios adapter 是 axios 源碼中負責處理 http/xhr request 的部份，如果直接 mock axios 裡的 request|get|put|del|... 這些方法，會中斷 axios 內部的邏輯（即 interceptors)，axios request 方法會呼叫 dispatchEmit, 而 dispatchEmit 會引用 adapter，所以如果真的要 mocking axios response 而不影響 axios 的內部邏輯，最好的方法是直接 mock adapter，方法只要在 AxiosRequestConfig 中注入自定義 Adapter 即可，透過 mockAdapter，可以決定應該返從 server 端返回什麼值。
 
 

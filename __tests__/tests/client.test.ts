@@ -2,8 +2,8 @@ import { BaseClient } from '@/base/impl/base_client_impl';
 import { DataResponse, ErrorResponse, formatHeader, requestClientOption, SuccessResponse } from '../setup/client.test.setup';
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import mockAxios, { authToken, EServerResponse, getMockAxiosInstances, mockAdapter, mockServer } from '../__mocks__/axios';
-import { Arr, Completer, Logger, setupCurrentEnv } from '@gdknot/frontend_common';
-import { AxiosTestHelper, ChainCondition, RequestAuthRejectStage } from '../helpers/axo.test.helper';
+import { Arr, Completer, Logger } from '@gdknot/frontend_common';
+import { AxiosTestHelper, ChainCondition, env, RequestAuthRejectStage } from '../helpers/axo.test.helper';
 import { EClientStage } from '@/index';
 import { LogModules } from '@/setup/logger.setup';
 
@@ -32,7 +32,6 @@ describe("Services", ()=>{
     helper = new AxiosTestHelper(client, authToken.value);
     instances = getMockAxiosInstances();
     axiosInstance = Arr(instances).last;
-    setupCurrentEnv("test");
   });
 
   describe("Remote Client", ()=>{
@@ -67,13 +66,6 @@ describe("Services", ()=>{
     });
 
     test("send auth triple times, expect triggered once only", async ()=>{
-      // const expectedResponse = {data: {token: preRenderedAuthToken}};
-      // const useValidator = false;
-      // const called = {
-      //   onAuthFetched: false,
-      //   onAuthUpdated: false,
-      //   onAuthorizing: false,
-      // };
       const lbound = mockAdapter.mock.results.length;
       let future1, future2, future3;
       
@@ -108,25 +100,6 @@ describe("Services", ()=>{
         })
       });
 
-      // const acCalls = {
-      //   acFetcher: false,
-      //   acToken: false,
-      //   acAuth: false,
-      //   acIdle: false,
-      // }
-      // helper.acFetchedMarker.onCanProcess(()=>{
-      //   acCalls.acFetcher = true;
-      // });
-      // helper.acTokenUpdater.onCanProcess(()=>{
-      //   acCalls.acToken = true;
-      // });
-      // helper.acAuthGuard.onCanProcess(()=>{
-      //   acCalls.acAuth = true;
-      // });
-      // helper.acIdleMarker.onCanProcess(()=>{
-      //   acCalls.acIdle = true;
-      // });
-
       expect(helper.client.authClient?.canAuth).toBeTruthy();
       future1 = helper.client.auth();
       await wait(50);
@@ -139,17 +112,9 @@ describe("Services", ()=>{
       expect(mockAdapter.mock.results.length).toBe(lbound + 1);
       
       expect(helper.client.stage).toBe(EClientStage.idle)
-      // expect(called.onAuthorizing).toBeTruthy();
-      // expect(called.onAuthFetched).toBeTruthy();
-      // expect(called.onAuthUpdated).toBeTruthy();
       expect(r1).toEqual(r2);
       expect(r1).toEqual(r3);
       expect(r2).toEqual(r3);
-
-      // expect(acCalls.acFetcher).toBeTruthy();
-      // expect(acCalls.acToken).toBeTruthy();
-      // expect(acCalls.acAuth).toBeTruthy();
-      // expect(acCalls.acIdle).toBeTruthy();
     });
 
     test("consecutively auth calling within min interval, expect only one call accepted", async ()=>{

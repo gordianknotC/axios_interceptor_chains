@@ -10,8 +10,8 @@ export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;
 /** 
  * {@inheritdoc BaseRequestReplacer} 
  * 用來取代當前的 request, @see {@link BaseRequestReplacer} 
- * 使用者可以延申擴展成不同的 RequestReplacer，只要覆寫
- * {@link canProcessFulFill} / {@link newRequest} 就行
+ * 使用者可以延申擴展成不同的 RequestReplacer，需覆寫
+ * {@link canProcessFulFill} / {@link newRequest} 
  * */
 export class RequestReplacer<
   RESPONSE ,
@@ -19,7 +19,7 @@ export class RequestReplacer<
   SUCCESS
 > extends BaseRequestReplacer<RESPONSE, ERROR, SUCCESS> {
 
-  canProcessFulFill(config: AxiosRequestConfig<any>): boolean {
-    return super.canProcessFulFill(config);
-  }
+  // processFulFill(config: AxiosRequestConfig<any>): AxiosRequestConfig<any> {
+  //   return this.switchIntoRejectResponse(config, RequestReplacer.name);
+  // }
 }

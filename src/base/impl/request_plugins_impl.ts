@@ -25,6 +25,23 @@ export abstract class BaseClientServiceRequestPlugin<
     super();
     assert(()=>this.assertCanAssemble() == undefined, ``);
   }
+  /** resolve request 並且繼續下一個 request fulfill chain */
+  resolve<T=AxiosRequestConfig<any>>(configOrResponse: T): T {
+    return processRequestFulFill(configOrResponse as any, this.next) as T;
+  }
+  /** resolve request 並結束整個 request chain */
+  resolveAndIgnoreAll<T = AxiosResponse<any, any> | AxiosRequestConfig<any>>(configOrResponse: T): Promise<T> {
+    return Promise.resolve(configOrResponse);
+  }
+  /** reject request 並且繼續下一個 request reject chain */
+  reject<T = AxiosResponse<any, any> | AxiosError<unknown, any> | AxiosRequestConfig<any>>(input: T): Promise<T> {
+    return processRequestReject(input as any, this.next) as any;
+  }
+  /** reject request 不執行於此後的 chain */
+  rejectAndIgnoreAll<T = AxiosResponse<any, any> | AxiosError<unknown, any> | AxiosRequestConfig<any>>(input: T): Promise<T> {
+    return Promise.reject(input);
+  }
+
   assertCanAssemble(): string | undefined {
     return "";
   }

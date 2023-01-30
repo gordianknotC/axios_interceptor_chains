@@ -1,7 +1,7 @@
 {
   "name": "@gdknot/request_client",
   "version": "0.0.1",
-  "description": "interceptor chains for axios",
+  "description": "axios interceptors implemented as responsibility chain",
   "scripts": {
     "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "build:watch": "concurrently --kill-others \"tsc --project tsconfig.build.json && tsc-alias -w -p tsconfig.build.json\"",
@@ -39,11 +39,11 @@
     "jest-mock-axios": "版本不要變，只能用4.5"
   },
   "dependencies": {
-    "@gdknot/frontend_common": "0.9.9",
+    "@gdknot/frontend_common": "0.9.11",
     "axios": "1.2.2"
   },
   "peerDependencies": {
-    "@gdknot/frontend_common": "0.9.9",
+    "@gdknot/frontend_common": "0.9.11",
     "axios": "1.2.2",
     "merge-anything": "^5.0.4",
     "colors": "^1.4.0",

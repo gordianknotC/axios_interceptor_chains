@@ -1,5 +1,5 @@
 import { BaseAuthResponseGuard } from "@/base/impl/base_auth_response_guard";
-import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
+import { BaseClientServicesPluginChains, ChainActionStage } from "@/base/itf/plugin_chains_itf";
 import { BaseClientServiceResponsePlugin } from "@/base/impl/response_plugins_impl";
 import {
   EClientStage,
@@ -10,7 +10,7 @@ import { Completer, QueueItem, UnExpectedError } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import { AuthClientResponseGuard } from "@/base/impl/base_auth_client_response_guard";
-import { BaseRequestReplacer } from "..";
+import { BaseRequestReplacer, RequestReplacer } from "..";
 import { ACAuthResponseGuard } from "./auth_client_guards";
 import { ErrorResponse } from "@/../__tests__/setup/client.test.setup";
 
@@ -28,7 +28,9 @@ export class ForbiddenResponseGuard extends BaseClientServiceResponsePlugin {
 }
 
  
+/**{@inheritdoc} BaseAuthResponseGuard */
 export class AuthResponseGuard extends BaseAuthResponseGuard {
+  
   protected onRequestNewAuth(error: AxiosError,  ): Promise<AxiosResponse>{
     return super.onRequestNewAuth(error);
   }
@@ -38,23 +40,19 @@ export class AuthResponseGuard extends BaseAuthResponseGuard {
   }
 
   processReject(error: AxiosError<unknown, any>): Promise<AxiosResponse<any, any> | AxiosError<unknown, any>> {
-    //if (this.isDirtiedBy(error, ACAuthResponseGuard.name)){
-    if ((error.config as any).headers["__chain_action__"] == ACAuthResponseGuard.configActionName){
-      console.log("processReject - requests from ACAuthGuard")
-      return Promise.reject(error);
+    if (this.isDirtiedBy(error, ACAuthResponseGuard.name, ChainActionStage.processResponse)){
+      return this.rejectAndIgnoreAll(error);
     }
-    //FIXME: 改為 this.nextChain(error);
-    return super.processReject(error);
+    return this.reject(error);
   }
  
   /** 
-   * @returns - 
-   * error.response?.status == axios.HttpStatusCode.Unauthorized
-      || error.message == BaseRequestReplacer.errorMessageForReplacement;
+   * @returns - 用來攔截以下二種情況
+   * isUnAuthorizedResponse || isRaisedFromRequestReplacer;
    */
   canProcessReject(error: AxiosError<unknown, any>): boolean {
     const isUnAuthorizedResponse = error.response?.status == axios.HttpStatusCode.Unauthorized;
-    const isRaisedFromRequestReplacer = error.message == BaseRequestReplacer.configActionName;
+    const isRaisedFromRequestReplacer = this.isDirtiedBy(error, RequestReplacer.name);
     return isUnAuthorizedResponse || isRaisedFromRequestReplacer;
   }
 }

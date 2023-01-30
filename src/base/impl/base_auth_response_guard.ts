@@ -1,7 +1,7 @@
 import { LogModules } from "@/setup/logger.setup";
 import { wait } from "@/utils/common_utils";
-import { AsyncQueue, Completer, Logger, QueueItem, UnExpectedError } from "@gdknot/frontend_common";
-import axios, { AxiosResponse, AxiosError } from "axios";
+import { AsyncQueue, Completer, Logger, NotImplementedError, QueueItem, UnExpectedError } from "@gdknot/frontend_common";
+import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 import { IBaseClient, EClientStage, QueueRequest, IBaseAuthClient } from "../itf/client_itf";
 import { BaseClientServicesPluginChains, processResponseFulFill, processResponseReject } from "../itf/plugin_chains_itf";
 import { BaseClientServiceResponsePlugin } from "./response_plugins_impl";
@@ -9,7 +9,8 @@ import { BaseClientServiceResponsePlugin } from "./response_plugins_impl";
 const D = new Logger(LogModules.AuthGuard);
 
 
-/**{@inheritdoc BaseClientServiceResponsePlugin} 
+/**
+ * {@inheritdoc BaseClientServiceResponsePlugin} 
  * 用來處理當 request 發出後出現 401/Unauthorized error，處理流程為
  * - {@link canProcessReject} > {@link processReject}
  *    - {@link onRestoreRequest}
@@ -30,7 +31,6 @@ export class BaseAuthResponseGuard
   constructor() {
     super();
   }
- 
  
   /** ### 用來生成代替 unauthorized error 的空請求
    * 當 unauthorized error 後，auth token 換發前，會生成一個空的 Promise 請求，
@@ -63,6 +63,30 @@ export class BaseAuthResponseGuard
     return this.client!.auth();
   }
 
+  /**
+  * @extendSummary - 用來處理當特定 response error 下，保流原請求後，進行 token 換發，流程為：
+  * - {@link onRestoreRequest} 保留請請
+  * - {@link onRequestNewAuth} 換發 auth token
+  *     - {@link onAuthError} 當 auth token 換發失败
+  *     - {@link onAuthSuccess} 當 auth token 換發成功
+  *     - {@link onAuthUncaughtError} 當 auth token 換發錯誤
+  */
+  protected async reject<T = AxiosResponse<any, any> | AxiosRequestConfig<any> | AxiosError<unknown, any>>(input: T): Promise<T> {
+    try{
+      const error = input as AxiosError;
+      const pending = this.onRestoreRequest(error);
+        D.info(["onRestoreRequest A", error.config?.url, this.client?.queue.queue.length]);
+        const authResponse = await this.onRequestNewAuth(error);
+        return pending.future;
+    }catch(e){
+      throw e;
+    }
+  }
+
+  protected rejectAndIgnoreAll<T = AxiosResponse<any, any> | AxiosRequestConfig<any> | AxiosError<unknown, any>>(input: T): Promise<T> {
+      return super.rejectAndIgnoreAll(input);
+  }
+
   /** @returns - false */
   canProcessFulFill(config: AxiosResponse<any, any>): boolean {
     return false;
@@ -85,25 +109,17 @@ export class BaseAuthResponseGuard
 
   /**
   * @extendSummary - 用來處理 unauthorized error 下，保流原請求後，進行 token 換發，流程為：
-  * - {@link onRestoreRequest}
-  * - {@link onRequestNewAuth}
-  *     - {@link onAuthError}
-  *     - {@link onAuthSuccess}
-  *     - {@link onAuthUncaughtError}
+  * - {@link onRestoreRequest} 保留請請
+  * - {@link onRequestNewAuth} 換發 auth token
+  *     - {@link onAuthError} 當 auth token 換發失败
+  *     - {@link onAuthSuccess} 當 auth token 換發成功
+  *     - {@link onAuthUncaughtError} 當 auth token 換發錯誤
   */
   async processReject(error: AxiosError): Promise<AxiosResponse | AxiosError> {
-    try{
-      const pending = this.onRestoreRequest(error);
-        D.info(["onRestoreRequest", error.config?.url, this.client?.queue.queue.length]);
-        D.info(["onRequestNewAuth A", error.config?.url])
-        const authResponse = await this.onRequestNewAuth(error);
-        D.info(["onRequestNewAuth B", error.config?.url])
-        return pending.future;
-      
-    }catch(e){
-      throw e;
-    }
+    throw new NotImplementedError();
   }
+
+  
 }
 
 

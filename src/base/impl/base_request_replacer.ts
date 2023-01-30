@@ -36,29 +36,6 @@ export class BaseRequestReplacer<
   ERROR,
   SUCCESS
 > {
-
-  /** 當request 進行取代持會 raise 這個 exception */
-  static configActionName: string = "BaseRequestReplacer.replaceRequest";
-
-  protected switchIntoRejectResponse(axiosError: AxiosError){
-    return Promise.reject(axiosError) as any;
-  }
-
-  protected error(config: AxiosRequestConfig<any>): AxiosError{
-    const axiosError: AxiosError = {
-      isAxiosError: false,
-      toJSON: function (): object {
-        return axiosError;
-      },
-      name: BaseRequestReplacer.configActionName,
-      message: BaseRequestReplacer.configActionName,
-      config
-    }
-    D.current(["throw error:", BaseRequestReplacer.configActionName]);
-    // (config as any).headers["__chain_action__"] = BaseRequestReplacer.configActionName;
-    return axiosError;
-  }
-
   /** 
    * 當 {@link canProcessFulFill} 為 true 則可以進行 {@link processFulFill}，這裡 
    * {@link canProcessFulFill} 只處理當 client 狀態為 {@link EClientStage.authorizing} 時，
@@ -77,7 +54,7 @@ export class BaseRequestReplacer<
    * reject進行攔截  
    * */
   processFulFill(config: AxiosRequestConfig<any>): AxiosRequestConfig<any> {
-    return this.switchIntoRejectResponse(this.error(config));
+    return this.switchIntoRejectResponse(config);
   }
 
   /** false */

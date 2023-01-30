@@ -2,8 +2,8 @@ import { BaseClient } from '@/base/impl/base_client_impl';
 import { DataResponse, ErrorResponse, formatHeader, requestClientOption, SuccessResponse } from '../setup/client.test.setup';
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import mockAxios, { authToken, EServerResponse, getMockAxiosInstances, mockAdapter, mockServer } from '../__mocks__/axios';
-import { Arr, Completer, Logger, setupCurrentEnv } from '@gdknot/frontend_common';
-import { AxiosTestHelper, ChainCondition, RequestAuthRejectStage } from '../helpers/axo.test.helper';
+import { Arr, Completer, Logger } from '@gdknot/frontend_common';
+import { AxiosTestHelper, ChainCondition, env, RequestAuthRejectStage } from '../helpers/axo.test.helper';
 import { EClientStage } from '@/index';
 import { LogModules } from '@/setup/logger.setup';
 
@@ -46,7 +46,6 @@ describe("Services", ()=>{
     helper = new AxiosTestHelper(client, authToken.value);
     instances = getMockAxiosInstances();
     axiosInstance = Arr(instances).last;
-    setupCurrentEnv("test");
   });
  
 
@@ -65,14 +64,7 @@ describe("Services", ()=>{
       const expectedFetched = {
         data: {username: "hello"}
       };
-      const mockReturns = {
-        "error_code": 401,
-        "error_key": "Unauthorized key",
-        "error_name": "Unauthorized name",
-        "message": "Unauthorized message",
-      };
       const payload = {};
-      
       mockServer.registerResponse(helper.client.authClient?.option.axiosConfig.url!, async ()=>({data: {
         token: preRenderedAuthToken
       }}), false);

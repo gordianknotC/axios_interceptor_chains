@@ -2,8 +2,8 @@ import { BaseClient } from '@/base/impl/base_client_impl';
 import { DataResponse, EErrorCode, ErrorResponse, formatHeader, requestClientOption, SuccessResponse } from '../setup/client.test.setup';
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import mockAxios, { authToken, AuthTokenExpiredError, EServerResponse, getMockAxiosInstances, mockAdapter, mockServer, UnauthorizedResponseError } from '../__mocks__/axios';
-import { Arr, Completer, Logger, setupCurrentEnv } from '@gdknot/frontend_common';
-import { AxiosTestHelper, ChainCondition, RequestAuthRejectStage } from '../helpers/axo.test.helper';
+import { Arr, Completer, Logger } from '@gdknot/frontend_common';
+import { AxiosTestHelper, ChainCondition, env, RequestAuthRejectStage } from '../helpers/axo.test.helper';
 import { EClientStage } from '@/index';
 import { LogModules } from '@/setup/logger.setup';
 import { expectedChainFlow } from '../helpers/chain.test.helper';
@@ -11,8 +11,6 @@ import { rejects } from 'assert';
 
 const S = (s: any)=>JSON.stringify(s)
 const D = new Logger(LogModules.Test);
-
-
 
 function wait (span: number): Promise<boolean>{
   return new Promise(resolve =>{
@@ -38,7 +36,6 @@ describe("AuthGuard", ()=>{
       helper = new AxiosTestHelper(client, authToken.value);
       mockServer.clear();
       jest.clearAllMocks();
-      setupCurrentEnv("test");
     });
 
     test("simple authorization - A - valid initialToken not provided", async ()=>{

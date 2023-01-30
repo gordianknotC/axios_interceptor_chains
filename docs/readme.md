@@ -60,47 +60,66 @@ export const authToken = { value: "I'M Auth Token" };
 export const formatHeader = { value: { format: "mock" } };
 export const authUrl = "path/to/auth_url";
 
+
 export const requestClientOption: ClientOption<
   DataResponse<any>,
   ErrorResponse,
   SuccessResponse
 > = {
-  isSuccessResponse: (s) => (s as SuccessResponse).succeed != undefined,
-  isDataResponse: (d) => (d as DataResponse<any>).data != undefined,
-  isErrorResponse: (e) => (e as ErrorResponse).error_code != undefined,
-  config: {
+  isSuccessResponse: (s: any) => (s as SuccessResponse).succeed != undefined,
+  isDataResponse: (d: any) => (d as DataResponse<any>).data != undefined,
+  isErrorResponse: (e: any) => (e as ErrorResponse).error_code != undefined,
+  axiosConfig: {
     baseURL,
     timeout,
   },
   requestChain: [
-    new UpdateAuthHeaderPlugin(function tokenGetter() {
+    new ClientRequestAuthHeaderUpdater(function () {
       return authToken.value;
     }),
-    new UpdateExtraHeaderPlugin(function headerGetter() {
+    new ClientRequestExtraHeaderUpdater(function () {
       return formatHeader.value;
     }),
-    new RequestReplacer(),
+    new RequestReplacer(
+      // replacementIdentifier = BaseRequestReplacer...
+    ),
   ],
   responseChain: [
     new AuthResponseGuard(),
-    new NetworkErrorResponseGuard(function onNetworkError(error){
+    new NetworkErrorResponseGuard(
+      function networkError(error){
       console.log("detect network error:", error);
     }),
   ],
   authOption: {
-    url: authUrl,
-    baseURL,
-    timeout: 12000,
+    axiosConfig: {
+      url: authUrl,
+      baseURL,
+      timeout: 12000,
+    },
     interval: 600,
+    requestChain: [],
+    responseChain: [
+      new ACFetchedMarker(),
+      new ACTokenUpdater(),
+      new ACAuthResponseGuard(),
+      new ACIdleMarker(),
+    ],
     payloadGetter: function () {
       return null;
     },
     tokenGetter: function () {
+      console.log("tokenGetter:", authToken.value);
       return authToken.value;
     },
     tokenUpdater: function (response: AxiosResponse<any, any>): void {
-      authToken.value = (response.data as any).data.token;
-      console.log("tokenUpdater:", authToken.value);
+      try{
+        console.log("tokenUpdater", (response.data as any).data.token)
+        authToken.value = (response.data as any).data.token;
+      }catch(e){
+        console.error("tokenUpdater error, response:", response, "\nerror:", e);
+        throw e;
+      }
     },
     redirect: function (response: AxiosResponse<any, any>) {
       console.log("redirect home");
@@ -123,8 +142,14 @@ const client = new RequestClient(requestClientOption)
 [s-baseRequestGuard]: ../src/base/impl/base_request_guard_impl.ts
 [s-requestClient]: ../src/base/impl/client_impl.ts
 [s-requestClient.types]: ../src/base/itf/client_itf.ts
+[s-eClientStage]: ../src/presets/auth_client_guards.ts
 
-[s-authGuard]: ../src/presets/auth_response_guard.ts
+[s-acAuthResponseGuard]: ../src/presets/auth_client_guards.ts
+[s-acFetchedMarker]: ../src/presets/auth_client_guards.ts
+[s-acIdleMarker]: ../src/presets/auth_client_guards.ts
+[s-acTokenUpdater]: ../src/presets/auth_client_guards.ts
+
+[s-authResponseGuard]: ../src/presets/auth_response_guard.ts
 [s-networkErrorGuard]: ../src/presets/network_error_response_guard.ts
 [s-headerUpdater]: ../src/presets/request_header_updater.ts
 [s-requestReplacer]: ../src/presets/request_replacer.ts

@@ -1,13 +1,12 @@
 import { assert } from "@gdknot/frontend_common";
-import type { AxiosError, AxiosResponse } from "axios";
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain } from "../itf/client_itf";
 import {
   BaseClientServicesPluginChains,
+  ChainActionStage,
   processResponseFulFill,
   processResponseReject,
 } from "../itf/plugin_chains_itf";
-
-
 
 
 /** 所有 response chain 均繼承 {@link BaseClientServiceResponsePlugin} */
@@ -18,13 +17,37 @@ export abstract class BaseClientServiceResponsePlugin<
     AxiosResponse,
     Promise<AxiosResponse>,
     CLIENT
-> {
+  >    
+{
 
   constructor(){
     super();
     assert(()=>this.assertCanAssemble() == undefined, ``);
   }
+  prev?: BaseClientServicesPluginChains<AxiosResponse<any, any>, Promise<AxiosResponse<any, any>>, CLIENT> | undefined;
+  next?: BaseClientServicesPluginChains<AxiosResponse<any, any>, Promise<AxiosResponse<any, any>>, CLIENT> | undefined;
+  client?: CLIENT | undefined;
 
+
+  /** resolve response 並且繼續下一個 response fulfill chain */
+  protected resolve<T = AxiosResponse<any, any> | AxiosRequestConfig<any>>(configOrResponse: T): Promise<T> {
+    return processResponseFulFill(configOrResponse as AxiosResponse, this.next) as any;
+  }
+  /** resolve response 不執行於此後的 chain */
+  protected resolveAndIgnoreAll<T = AxiosResponse<any, any> | AxiosRequestConfig<any>>(configOrResponse: T): Promise<T> {
+    return Promise.resolve(configOrResponse);
+  }
+  /** reject response 並且繼續下一個 response reject chain */
+  protected reject<T = AxiosResponse<any, any> | AxiosError<unknown, any> | AxiosRequestConfig<any>>(input: T): Promise<T> {
+    return processResponseReject(input as any, this.next) as any;
+  }
+  /** reject response 不執行於此後的 chain */
+  protected rejectAndIgnoreAll<T = AxiosResponse<any, any> | AxiosError<unknown, any> | AxiosRequestConfig<any>>(input: T): Promise<T> {
+    return Promise.reject(input);
+  }
+  
+
+  // todo: -------- 
   assertCanAssemble(): string | undefined {
     return undefined;
   }
@@ -68,4 +91,6 @@ export abstract class BaseClientServiceResponsePlugin<
   processReject(error: AxiosError): Promise<AxiosError | AxiosResponse> {
     return  processResponseReject(error, this.next);
   }
+
+  
 }

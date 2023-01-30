@@ -50,7 +50,7 @@ function isAxiosConfig(input: ChainInput):boolean{
   return !isAxiosError(input) && !isAxiosResponse(input);
 }
 
-function callMethod(chain: BaseClientServicesPluginChains<any, any, any>, input: any, method: EMethod): any{
+function onStage(chain: BaseClientServicesPluginChains<any, any, any>, input: any, method: EMethod): any{
   (chain as any).setStage(input, method);
   const ret = chain[method](input);
   switch (method) {
@@ -80,17 +80,13 @@ export function processResponseFulFill(
   response: AxiosResponse,
   chain?: BaseClientServicesPluginChains<any, any, any>
 ): Promise<AxiosResponse> {
-  if (!chain) return Promise.resolve(response);
-  if (ensureCanProcessFulFill(() => {
-    const canGo = callMethod(chain, response, EMethod.canProcessFulFill);
-    D.info([chain.constructor.name, "Response.canProcessFulFill", response.config.url, response.config.headers, canGo])
-    return canGo;
-  })) {
-    D.info([chain.constructor.name, "Response.processFulFill", response.config.url, response.config.headers,])
-    return callMethod(chain, response, EMethod.processFulFill);
+  if (!chain) 
+    return Promise.resolve(response); // 結束責任鍊
+  if (ensureCanProcessFulFill(() => onStage(chain, response, EMethod.canProcessFulFill))) {
+    return onStage(chain, response, EMethod.processFulFill); // chain
   } else {
     if (chain.next && chain.canGoNext(response.config!)) {
-      return processResponseFulFill(response, chain.next);
+      return processResponseFulFill(response, chain.next); // next chain
     }
     return processResponseFulFill(response, undefined);
   }
@@ -102,12 +98,12 @@ export function processResponseReject(
 ): Promise<AxiosError | AxiosResponse> {
   if (!chain) return Promise.reject(error!);
   if (ensureCanReject(() => {
-    const canGo = callMethod(chain, error, EMethod.canProcessReject);
+    const canGo = onStage(chain, error, EMethod.canProcessReject);
     D.info([chain.constructor.name, "Response.canProcessReject", error.config?.url, error.config?.headers,, canGo])
     return canGo;
   })) {
     D.info([chain.constructor.name, "Response.processReject", error.config?.url, error.config?.headers,])
-    return callMethod(chain, error, EMethod.processReject);;
+    return onStage(chain, error, EMethod.processReject);;
   } else {
     if (chain.next && chain.canGoNext(error.config!)) {
       return processResponseReject(error, chain.next);
@@ -144,12 +140,12 @@ export function processRequestFulFill(
 ): AxiosRequestConfig {
   if (!chain) return config;
   if (ensureCanProcessFulFill(() => {
-    const canGo = callMethod(chain, config, EMethod.canProcessFulFill);
+    const canGo = onStage(chain, config, EMethod.canProcessFulFill);
     D.info([chain.constructor.name, "Request.canProcessFulFill", config.url, config.headers,canGo])
     return canGo;
   })) {
     D.info([chain.constructor.name, "Request.processFulFill", config.url, config.headers,])
-    return callMethod(chain, config, EMethod.processFulFill);
+    return onStage(chain, config, EMethod.processFulFill);
   } else {
     if (chain.next && chain.canGoNext(config))
       return processRequestFulFill(config, chain.next);
@@ -163,12 +159,12 @@ export function processRequestReject(
 ): Promise<AxiosError | AxiosResponse> {
   if (!chain) return Promise.reject(error!);
   if (ensureCanReject(() => {
-    const canGo = callMethod(chain, error, EMethod.canProcessReject);
+    const canGo = onStage(chain, error, EMethod.canProcessReject);
     D.info([chain.constructor.name, "Request.canProcessReject",  chain.constructor.name, error.config?.url, error.config?.headers, canGo])
     return canGo;
   })) {
     D.info([chain.constructor.name, "Request.processReject", chain.constructor.name, error.config?.url, error.config?.headers])
-    return callMethod(chain, error, EMethod.processReject);
+    return onStage(chain, error, EMethod.processReject);
   } else {
     if (chain.next && chain.canGoNext(error.config))
       return processRequestReject(error, chain.next);
@@ -192,12 +188,6 @@ function onRequestError(chain: BaseClientServicesPluginChains<any, any, any>){
   }
 }
 
-// TODO: 所有 request/response 再轉發需要特定方法，注入可識別的 header
-// 好讓其他 Chain 可以得知這是由哪裡轉發而來的，轉發應有以下
-// redirectStack: Stack[], Stack = {stage:.., name:...} 
-const chainActionRegistry: ArrayDelegate<{name:string, stage: ChainActionStage}> = Arr([]);
-
-
 // export abstract class PluginChainActionRegistry {
 //   abstract name: string;
 //   abstract requestAction: (request: AxiosRequestConfig)=> void;
@@ -218,17 +208,17 @@ export abstract class BaseClientServicesPluginChains<
     =IBaseClient<any, any, any>
 > {
   /** instal request/response responsibility chain
-   * @see {@link BaseClient}
-   * @example - 於 BaseClient 內部
-   * ```ts 
+  * @see {@link BaseClient}
+  * @example - 於 BaseClient 內部
+  ```ts 
      if (is.not.empty(requestChain)){
         BaseClientServicesPluginChains.install(requestChain, this, "request");
      }
      if (is.not.empty(responseChain)){
         BaseClientServicesPluginChains.install(responseChain, this, "response");
      }
-   * ```
-   */
+  ```
+  */
   static install<CLIENT extends IBaseClientResponsibilityChain & IBaseClientProperties<any>>(
     chain: BaseClientServicesPluginChains<any, any, any>[], 
     client: CLIENT,
@@ -260,9 +250,14 @@ export abstract class BaseClientServicesPluginChains<
   abstract next?: BaseClientServicesPluginChains<INPUT, OUTPUT, CLIENT>;
   /** ClientService */
   abstract client?: CLIENT;
-
   /** assertion for assembling responsibility chain */
   abstract assertCanAssemble(): string | undefined;
+  //
+  protected abstract resolve<T=AxiosRequestConfig | AxiosResponse>(configOrResponse: T): Promise<T>|T; 
+  protected abstract resolveAndIgnoreAll<T=AxiosRequestConfig | AxiosResponse>(configOrResponse: T): Promise<T>|T; 
+  protected abstract reject<T=AxiosRequestConfig | AxiosResponse | AxiosError>(input: T): Promise<T>; 
+  protected abstract rejectAndIgnoreAll<T=AxiosRequestConfig | AxiosResponse | AxiosError>(input: T): Promise<T>; 
+  //
   abstract processFulFill(config: INPUT): OUTPUT;
   abstract processReject(error: AxiosError): Promise<AxiosError|AxiosResponse>;
   /** 增加下一個 chain */
@@ -336,6 +331,8 @@ export abstract class BaseClientServicesPluginChains<
         break;
     }
   }
+
+  /** {@link AxiosResponse}|{@link AxiosError} 轉換為 {@link axiosConfig} */
   protected toAxiosConfig(input: ChainInput): AxiosRequestConfig{
     return isAxiosConfig(input)
       ? input as AxiosRequestConfig
@@ -345,15 +342,52 @@ export abstract class BaseClientServicesPluginChains<
           ? (input as AxiosResponse).config
           : (function(){throw new Error()})()
   }
+  /** 
+   * 以當前的物件名稱及 {@link ChanActionStage} 註記於 {@link AxiosRequestConfig}.header 
+   * 中, 用於當 RequestChain / ResponseChain 轉發流程時，得以透過 header 得知該流程由哪裡轉發而來
+   * @example 
+   * reject 當前 request, 並標記於 header 中, 好讓其他 chain 能夠知道這個 AxiosError
+   * 是由哪一個 chain reject 而來
+   * ```ts
+    // RequestChain
+    protected switchIntoRejectResponse(config: AxiosRequestConfig, ident:string){
+      this.markDirty(config);
+      const stage = this.stage!;
+      const axiosError: AxiosError = {
+        isAxiosError: false,
+        toJSON: function (): object {
+          return axiosError;
+        },
+        name: ident,
+        message: ident,
+        config
+      };
+      return Promise.reject(axiosError) as any;
+    }
+    // ResponseChain
+    processReject(error: AxiosError<unknown, any>): Promise<AxiosResponse<any, any> | AxiosError<unknown, any>> {
+      if (this.isDirtiedBy(error, ACAuthResponseGuard.name, ChainActionStage.processResponse)){
+        console.log("processReject - requests from ACAuthGuard")
+        return Promise.reject(error);
+      }
+      return this.reject(error);
+    }
+   * 
+   * ```
+   * mark request header as dirty */
   protected markDirty(input: ChainInput): AxiosRequestConfig{
     const config = this.toAxiosConfig(input);
     const name = this.constructor.name;
     (config.headers! as any)[`__chain_action_${name}__`] = this.stage;
     return config;
   }
-  protected isDirtiedBy(input: ChainInput, identity: string): boolean{
+  /** read request header to see if it's dirtied or not */
+  protected isDirtiedBy(input: ChainInput, identity: string, stage?: ChainActionStage): boolean{
     const config = this.toAxiosConfig(input);
-    return (config.headers! as any)[`__chain_action_${identity}__`] != undefined;
+    const result =  stage 
+      ? (config.headers! as any)[`__chain_action_${identity}__`] == stage
+      : (config.headers! as any)[`__chain_action_${identity}__`] != undefined;
+    return result;
   }
   protected _onProcess?: ()=>void;
   public onProcess(cb: ()=>void, terminateAfterCall: boolean = true){

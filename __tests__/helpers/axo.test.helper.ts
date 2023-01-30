@@ -6,7 +6,7 @@ import {
   ClientRequestExtraHeaderUpdater,
 } from "@/presets/request_header_updater";
 import { formatHeader } from "../setup/client.test.setup";
-import { authToken, EServerResponse, mockAdapter, mockServer } from "../__mocks__/axios";
+import { authToken, EServerResponse, mockAdapter, mockServer, UnauthorizedResponseError } from "../__mocks__/axios";
 import type { AxiosError, AxiosResponse } from "axios";
 import {
   Arr,
@@ -47,7 +47,6 @@ type Chains =
   | ClientResponseChain
   | ACRequestChain
   | ACResponseChain;
-
 enum ChainKind {
   ClientRequestChain = "ClientRequestChain",
   ClientResponseChain = "ClientResponseChain",
@@ -98,6 +97,8 @@ export enum ResponseScenario {
   unauthorizedResponse,
   unauthorizedResponseTurningIntoAuthorizedByChain,
 }
+
+export const env = "production"
 
 type TestRecord = {
   name: string;
@@ -418,12 +419,7 @@ export class AxiosTestHelper {
     return fetched;
   }
   protected get unAuthorizedResponse() {
-    return {
-      message: "Unauthorized",
-      error_name: "Unauthorized",
-      error_code: 401,
-      error_key: "Unauthorized",
-    };
+    return UnauthorizedResponseError;
   }
   spyOnAllGuards() {
     jest.spyOn(this.authGuard as any, "onRestoreRequest");
@@ -731,12 +727,6 @@ export class AxiosTestHelper {
     const expected = { data: { username: "expect2" } };
     const payload = {};
     const terminate = true;
-    const errorResponse = {
-      message: "Unauthorized",
-      error_name: "Unauthorized",
-      error_code: 401,
-      error_key: "Unauthorized",
-    };
     authToken.value = "helloworld";
     mockServer.registerResponse(
       this.client.authClient?.option.axiosConfig.url!,
@@ -770,6 +760,6 @@ export class AxiosTestHelper {
     );
   }
 
-  
+
 }
  

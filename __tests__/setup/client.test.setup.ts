@@ -34,14 +34,6 @@ export const formatHeader = { value: { format: "mock" } };
 const authUrl = "path/to/auth_url";
 
 
-export const customizedErrors: Partial<Record<HttpStatusCode, ErrorResponse>> = {
-  [axios.HttpStatusCode.Unauthorized]: {
-    message: "Unauthorized",
-    error_name:  "Unauthorized",
-    error_code: 401,
-    error_key:  "Unauthorized"
-  } as any
-}
 
 export const requestClientOption: ClientOption<
   DataResponse<any>,
@@ -68,12 +60,8 @@ export const requestClientOption: ClientOption<
   ],
   responseChain: [
     new AuthResponseGuard(
-      // isUnauthorized
-      // isRequestFromRequestReplacer
-      // isRequestFromAuthClientGuard
     ),
     new NetworkErrorResponseGuard(
-      // isNetworkError
       function networkError(error){
       console.log("detect network error:", error);
     }),

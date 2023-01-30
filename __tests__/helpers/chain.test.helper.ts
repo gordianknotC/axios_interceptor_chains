@@ -1,3 +1,4 @@
+import { ChainActionStage } from "@/base/itf/plugin_chains_itf";
 import { LogModules } from "@/setup/logger.setup";
 import { ErrorResponse } from "../setup/client.test.setup";
 import { authToken } from "../__mocks__/axios";
@@ -136,32 +137,32 @@ export const expectedChainFlow = {
     return [
       {
         name: `ClientRequestAuthHeaderUpdater.canProcessFulFill`,
-        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${initialToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action__":"ACAuthResponseGuard.bypassAuthGuard"}}`,
-     output: `true`,
+        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${initialToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
+        output: `true`,
         stage: `idle`
       },
       {
         name: `ClientRequestExtraHeaderUpdater.canProcessFulFill`,
-        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action__":"ACAuthResponseGuard.bypassAuthGuard"}}`,
+        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         output: `true`,
         stage: `idle`
       },
       {
         name: `RequestReplacer.canProcessFulFill`,
-        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action__":"ACAuthResponseGuard.bypassAuthGuard"}}`,
+        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         output: `false`,
         stage: `idle`
       },
       {
         name: `ClientRequestExtraHeaderUpdater.processFulFill`,
-        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action__":"ACAuthResponseGuard.bypassAuthGuard"}}`,
-        output: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action__":"ACAuthResponseGuard.bypassAuthGuard"}}`,
+        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
+        output: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         stage: `idle`
       },
       {
         name: `ClientRequestAuthHeaderUpdater.processFulFill`,
-        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action__":"ACAuthResponseGuard.bypassAuthGuard"}}`,
-        output: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action__":"ACAuthResponseGuard.bypassAuthGuard"}}`,
+        input: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
+        output: `{"headers":{"Accept":"application/json, text/plain, */*","Authorization":"${authToken}","format":"mock","User-Agent":"axios/1.2.1","__chain_action_ACAuthResponseGuard__":"${ChainActionStage.processResponse}"}}`,
         stage: `idle`
       },
       {
