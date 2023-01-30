@@ -12,16 +12,17 @@ import { AxiosTestHelper } from "../helpers/axo.test.helper";
 import { authToken, _EErrorCode } from "../__mocks__/axios";
 
 export const EErrorCode = _EErrorCode;
-
 export type DataResponse<T> = { 
   data: T; pager: any
  };
+
 export type ErrorResponse = {
   error_key: string;
   error_code: string;
   error_msg: string;
   message: string;
 };
+
 export type SuccessResponse = { succeed: boolean };
 export type AuthResponse = DataResponse<{
   token: string
@@ -32,8 +33,6 @@ const baseURL = "http://localhost";
 
 export const formatHeader = { value: { format: "mock" } };
 const authUrl = "path/to/auth_url";
-
-
 
 export const requestClientOption: ClientOption<
   DataResponse<any>,
