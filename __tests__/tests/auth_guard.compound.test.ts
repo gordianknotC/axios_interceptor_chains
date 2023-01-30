@@ -413,7 +413,7 @@ describe("AuthGuard", () => {
 
     test("tokenUpdater updating an undefined token, expect rasing error", () => {
       helper.spyOnAllGuards();
-      const authExpected = { data: { token: undefined } };
+      const authExpected = { data: { token: undefined } as any };
       authToken.value = preRenderedAuthToken;
       expect(
         helper.auth(async () => {

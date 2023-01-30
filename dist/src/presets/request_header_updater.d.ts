@@ -1,4 +1,4 @@
-import { BaseRequestHeaderGuard } from "../../base/impl/base_request_guard";
+import { BaseRequestHeaderGuard } from "@/base/impl/base_request_guard";
 import { AxiosHeaders } from "axios";
 export type AxiosHeaderValue = AxiosHeaders | string | string[] | number | boolean | null;
 export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;

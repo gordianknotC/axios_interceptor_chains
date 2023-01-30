@@ -1,5 +1,5 @@
-import { LogModules } from "../../../setup/logger.setup";
-import { wait } from "../../../utils/common_utils";
+import { LogModules } from "@/setup/logger.setup";
+import { wait } from "@/utils/common_utils";
 import { Logger, NotImplementedError } from "@gdknot/frontend_common";
 import axios from "axios";
 import { BaseClientServiceResponsePlugin } from "./response_plugins_impl";

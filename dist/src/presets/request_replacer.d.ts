@@ -1,4 +1,4 @@
-import { BaseRequestReplacer } from "../../base/impl/base_request_replacer";
+import { BaseRequestReplacer } from "@/base/impl/base_request_replacer";
 import { AxiosHeaders } from "axios";
 export type AxiosHeaderValue = AxiosHeaders | string | string[] | number | boolean | null;
 export type RawAxiosHeaders = Record<string, AxiosHeaderValue>;

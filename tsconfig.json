@@ -4,9 +4,7 @@
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    /** strict mode ...*/
-    // "noImplicitUseStrict": true,
-    "alwaysStrict": true,
+
     "baseUrl": "src",
     "declaration": true /* Generates corresponding '.d.ts' file. */,
     "diagnostics": true,
@@ -18,9 +16,7 @@
     "jsxFactory": "h" /* Specify the JSX factory function to use when targeting react JSX emit, e.g. React.createElement or h. */,
     "lib": [
       "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
+      "dom"
     ],
     "moduleResolution": "node",
     /**
@@ -43,7 +39,6 @@
         "*"
       ]
     },
-    "resolveJsonModule": true,
     "rootDirs": [
       "src",
       "dist"
@@ -51,14 +46,6 @@
     
     "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true,
-    "strictBindCallApply": true /**/,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true /* Enable strict null checks. */,
-    "strictPropertyInitialization": true,
-    // 這裡將 module / target 設一樣是為了解決 jest
-    // compile 後會出現 SyntaxError, 真正的 module / target
-    // 見 tsconfig.build.json
     "module": "es2020",
     "target": "es2020",
     "typeRoots": [
@@ -68,7 +55,7 @@
       "node",
       "jest"
     ] 
-  },
+  }, 
   "exclude": [
     "node_modules",
     "dist",
@@ -80,7 +67,6 @@
     "src",
     "src/index.ts",
     "src/**/*.ts",
-    "__tests__/tests/*.ts",
     "__tests__/**/*.ts",
     "__tests__/**/*.tsx",
     "__tests__/*.tsx",

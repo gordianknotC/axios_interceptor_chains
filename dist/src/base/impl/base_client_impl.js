@@ -2,7 +2,7 @@ import { EClientStage } from "../itf/client_itf";
 import { BaseClientServicesPluginChains } from "../itf/plugin_chains_itf";
 import axios from "axios";
 import { is, assert, AsyncQueue, Logger } from "@gdknot/frontend_common";
-import { LogModules } from "../../../setup/logger.setup";
+import { LogModules } from "@/setup/logger.setup";
 import { BaseAuthClient } from "./base_auth_client";
 const D = new Logger(LogModules.Client);
 export const DEFAULT_AUTH_CLIENT_OPTION = {

@@ -1,4 +1,4 @@
-import { BaseRequestHeaderGuard } from "../../base/impl/base_request_guard";
+import { BaseRequestHeaderGuard } from "@/base/impl/base_request_guard";
 import { assert } from "console";
 /** 自動將 axios request config 寫入正確的 authorization header
  * @example

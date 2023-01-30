@@ -1,5 +1,5 @@
-import { LogModules } from "../../../setup/logger.setup";
-import { ensureCanProcessFulFill, ensureCanReject } from "../../../utils/common_utils";
+import { LogModules } from "@/setup/logger.setup";
+import { ensureCanProcessFulFill, ensureCanReject } from "@/utils/common_utils";
 import { assert, Logger } from "@gdknot/frontend_common";
 const D = new Logger(LogModules.Plugin);
 const byPassAll = false;

@@ -1,4 +1,4 @@
-import { BaseClientServiceResponsePlugin } from "../../base/impl/response_plugins_impl";
+import { BaseClientServiceResponsePlugin } from "@/base/impl/response_plugins_impl";
 /**
  * {@inheritdoc BaseClientServiceResponsePlugin}
  * 用來攔截 Network Error

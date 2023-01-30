@@ -1,6 +1,6 @@
-import { BaseClientServicesPluginChains } from "../../../base/itf/plugin_chains_itf";
-import { BaseClientServiceRequestPlugin } from "../../../base/impl/request_plugins_impl";
-import { IBaseClient } from "../../../base/itf/client_itf";
+import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
+import { BaseClientServiceRequestPlugin } from "@/base/impl/request_plugins_impl";
+import { IBaseClient } from "@/base/itf/client_itf";
 import { AxiosError, AxiosRequestConfig, AxiosHeaders } from "axios";
 export type AxiosHeaderValue = AxiosHeaders | string | string[] | number | boolean | null;
 /** Axios 所定義，為單層物件, 複雜物件可能要轉 JSONString */

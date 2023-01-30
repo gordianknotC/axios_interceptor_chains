@@ -1,10 +1,13 @@
 {
   "extends": "./tsconfig.json",
+  "module": "CommonJS",
+  "target": "es2020",
   "exclude": [
     "node_modules",
     "dist",
     ".vite-storybook",
     "storybook-static",
-    "__tests__"
-  ],
+    "__tests__",
+    "__tests__/**"
+  ], 
 }

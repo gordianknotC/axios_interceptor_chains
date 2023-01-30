@@ -1,4 +1,4 @@
-import { BaseRequestReplacer } from "../../base/impl/base_request_replacer";
+import { BaseRequestReplacer } from "@/base/impl/base_request_replacer";
 /**
  * {@inheritdoc BaseRequestReplacer}
  * 用來取代當前的 request, @see {@link BaseRequestReplacer}

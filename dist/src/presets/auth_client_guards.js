@@ -1,7 +1,7 @@
 import { Logger } from "@gdknot/frontend_common";
 import axios from "axios";
-import { AuthClientResponseGuard, AuthClientStageMarker } from "../../base/impl/base_auth_client_response_guard";
-import { LogModules } from "../../setup/logger.setup";
+import { AuthClientResponseGuard, AuthClientStageMarker } from "@/base/impl/base_auth_client_response_guard";
+import { LogModules } from "@/setup/logger.setup";
 const D = new Logger(LogModules.AuthClient);
 /** 處理以下請況
  *

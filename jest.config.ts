@@ -13,29 +13,15 @@ const jestConfig: JestConfigWithTsJest = {
   testRegex: [
     "(/__tests__/tests/.*|(\\.|/)(test|spec))\\.[jt]sx?$"
   ],
-  testPathIgnorePatterns: [
-    // "./__tests__/setup/*.ts",
-    // "./__tests__/mocks/*.ts",
-    // "./__tests__/helper/*.ts"
-  ],
-  transform: {
-    "^.+\\.m?[tj]sx?$": [
-      "ts-jest",
-      {
-        useESM: true // this tells `ts-jest` ready to transform files to ESM syntax
-      }
-    ]
-  },
+  testPathIgnorePatterns: ["/node_modules/", "/__tests__/__mocks__/.*"],
   roots: ["<rootDir>"],
   modulePaths: ["<rootDir>/src"],
   moduleDirectories: ["node_modules"],
   moduleNameMapper: {
     "@/(.*)": ["<rootDir>/src/$1"],
     "~/(.*)": ["<rootDir>/src/$1"]
-    // "@gdknot/frontend_common": '<rootDir>/node_modules/@gdknot/frontend_common/dist/index.js'
   },
   globals: {},
-  //globalSetup: "<rootDir>/__tests__/setup/globalSetup/index.ts",
   setupFilesAfterEnv: ["jest-expect-message"]
 };
 

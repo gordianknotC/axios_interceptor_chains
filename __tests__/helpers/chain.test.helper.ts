@@ -296,5 +296,5 @@ export const expectedChainFlow = {
     ]
   },
 
-  partial_unAuthorizedGet: ()=>[]
+  partial_unAuthorizedGet: ()=>[] as any
 };

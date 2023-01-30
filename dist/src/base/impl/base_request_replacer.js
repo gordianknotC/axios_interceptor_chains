@@ -1,7 +1,7 @@
-import { EClientStage, } from "../../../base/itf/client_itf";
+import { EClientStage, } from "@/base/itf/client_itf";
 import { Logger } from "@gdknot/frontend_common";
 import { BaseRequestGuard } from "./base_request_guard";
-import { LogModules } from "../../../setup/logger.setup";
+import { LogModules } from "@/setup/logger.setup";
 const D = new Logger(LogModules.RequestReplacer);
 /**
  * {@inheritdoc BaseRequestGuard}

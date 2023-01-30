@@ -2,7 +2,7 @@ import { EClientStage } from "../itf/client_itf";
 import { BaseClientServicesPluginChains } from "../itf/plugin_chains_itf";
 import axios from "axios";
 import { is, AsyncQueue, Logger, Completer } from "@gdknot/frontend_common";
-import { LogModules } from "../../../setup/logger.setup";
+import { LogModules } from "@/setup/logger.setup";
 const D = new Logger(LogModules.Client);
 export class BaseAuthClient {
     get callInterval() {

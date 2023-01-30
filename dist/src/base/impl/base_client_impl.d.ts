@@ -2,7 +2,7 @@ import { EClientStage, IBaseClient as IBaseClient, ClientAuthOption, ClientOptio
 import { BaseClientServicesPluginChains } from "../itf/plugin_chains_itf";
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { AsyncQueue } from "@gdknot/frontend_common";
-import { RawAxiosHeaders } from "../../../presets/request_header_updater";
+import { RawAxiosHeaders } from "@/presets/request_header_updater";
 export declare const DEFAULT_AUTH_CLIENT_OPTION: Partial<ClientAuthOption>;
 /** {@inheritdoc IClientService}
 *

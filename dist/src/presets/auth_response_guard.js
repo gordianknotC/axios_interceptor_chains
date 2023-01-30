@@ -1,6 +1,6 @@
-import { BaseAuthResponseGuard } from "../../base/impl/base_auth_response_guard";
-import { ChainActionStage } from "../../base/itf/plugin_chains_itf";
-import { BaseClientServiceResponsePlugin } from "../../base/impl/response_plugins_impl";
+import { BaseAuthResponseGuard } from "@/base/impl/base_auth_response_guard";
+import { ChainActionStage } from "@/base/itf/plugin_chains_itf";
+import { BaseClientServiceResponsePlugin } from "@/base/impl/response_plugins_impl";
 import axios from "axios";
 import { RequestReplacer } from "..";
 import { ACAuthResponseGuard } from "./auth_client_guards";

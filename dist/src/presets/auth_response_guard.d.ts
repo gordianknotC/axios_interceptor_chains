@@ -1,7 +1,7 @@
-import { BaseAuthResponseGuard } from "../../base/impl/base_auth_response_guard";
-import { BaseClientServicesPluginChains } from "../../base/itf/plugin_chains_itf";
-import { BaseClientServiceResponsePlugin } from "../../base/impl/response_plugins_impl";
-import { IBaseClient } from "../../base/itf/client_itf";
+import { BaseAuthResponseGuard } from "@/base/impl/base_auth_response_guard";
+import { BaseClientServicesPluginChains } from "@/base/itf/plugin_chains_itf";
+import { BaseClientServiceResponsePlugin } from "@/base/impl/response_plugins_impl";
+import { IBaseClient } from "@/base/itf/client_itf";
 import { Completer, QueueItem } from "@gdknot/frontend_common";
 import type { AxiosError, AxiosResponse } from "axios";
 export declare class ForbiddenResponseGuard extends BaseClientServiceResponsePlugin {

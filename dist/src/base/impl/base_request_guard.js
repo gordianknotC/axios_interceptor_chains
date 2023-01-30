@@ -1,6 +1,6 @@
-import { BaseClientServiceRequestPlugin } from "../../../base/impl/request_plugins_impl";
+import { BaseClientServiceRequestPlugin } from "@/base/impl/request_plugins_impl";
 import { Logger, NotImplementedError } from "@gdknot/frontend_common";
-import { LogModules } from "../../../setup/logger.setup";
+import { LogModules } from "@/setup/logger.setup";
 const D = new Logger(LogModules.HeaderUpdater);
 /**
  * @typeParam RESPONSE - response 型別

@@ -212,7 +212,7 @@ export class BaseClient<DATA , ERROR, SUCCESS, QUEUE extends QueueRequest = Queu
       this.setStage(EClientStage.idle);
       if (e == undefined){
         console.error(`Network Error: url - ${url}, method - ${method}`);
-        const code = undefined;
+        const code: any = undefined;
         throw new axios.AxiosError("Network Error", code, config)
       } else if ((e as AxiosError).isAxiosError){
         const error = e as AxiosError;

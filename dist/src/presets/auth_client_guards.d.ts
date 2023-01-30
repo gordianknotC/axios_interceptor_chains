@@ -1,5 +1,5 @@
 import type { AxiosError, AxiosResponse } from "axios";
-import { AuthClientResponseGuard, AuthClientStageMarker } from "../../base/impl/base_auth_client_response_guard";
+import { AuthClientResponseGuard, AuthClientStageMarker } from "@/base/impl/base_auth_client_response_guard";
 /** 處理以下請況
  *
  * 1) 用來處理當非AuthClient 送出的請求於遠端返回 unauthorized error

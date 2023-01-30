@@ -103,7 +103,7 @@ class MockedServer {
           headers: {},
           config,
         };
-        const request = undefined
+        const request: any = undefined
         console.log("MockServer - return unauthorized error", config.url);
         return new axios.AxiosError(name, undefined, config, request, response);
       } catch (e) {
