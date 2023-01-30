@@ -7,7 +7,6 @@ import { BaseClientServicesPluginChains } from "./plugin_chains_itf";
 //          T Y P E S
 //
 //
-//
 /** 代表 client 當前的狀態表示, idle/fetching/authorizing*/
 export enum EClientStage {
   idle = "idle",
