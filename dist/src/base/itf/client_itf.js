@@ -3,7 +3,6 @@
 //          T Y P E S
 //
 //
-//
 /** 代表 client 當前的狀態表示, idle/fetching/authorizing*/
 export var EClientStage;
 (function (EClientStage) {
