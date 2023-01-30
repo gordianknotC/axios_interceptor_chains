@@ -27,6 +27,7 @@
     "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
     "noImplicitThis": true /* Raise error on 'this' expressions with an implied 'any' type. */,
     "outDir": "dist" /* Redirect output structure to the directory. */,
+    "outFile": "./dist/index.js",
     "paths": {
       "@/*": [
         "*"
@@ -41,13 +42,12 @@
     },
     "rootDirs": [
       "src",
-      "dist"
     ],
     
     "skipLibCheck": true,
     "sourceMap": true,
-    "module": "es2020",
-    "target": "es2020",
+    "module": "AMD",
+    "target": "ES2018",
     "typeRoots": [
       "node_modules/@types"
     ],
@@ -75,5 +75,7 @@
     "jest.d.ts"
   ],
   // support jest-expect message, see: https://github.com/mattphillips/jest-expect-message
-  "files": ["node_modules/jest-expect-message/types/index.d.ts"],
+  "files": [
+    "node_modules/jest-expect-message/types/index.d.ts"
+  ],
 }
