@@ -4,7 +4,7 @@
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "src",
+    "baseUrl": ".",
     "declaration": true /* Generates corresponding '.d.ts' file. */,
     "diagnostics": true,
     "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
@@ -28,16 +28,17 @@
     "outDir": "dist" /* Redirect output structure to the directory. */,
     "paths": {
       "@/*": [
-        "*"
+        "src/*"
       ],
       /*
        *     A L I A S   P A T H
        *     需要同時設置 vue.config.js - alias
        **/
       "~/*": [
-        "*"
+        "src/*"
       ]
     },
+    "rootDir": ".",
     "rootDirs": [
       "src",
       "dist"

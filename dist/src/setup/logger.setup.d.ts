@@ -1,5 +1,5 @@
 import { Logger } from "@gdknot/frontend_common";
-import { AllowedModule } from "@gdknot/frontend_common/dist/utils/logger.types";
+import { AllowedModule } from "@gdknot/frontend_common";
 export declare enum EModules {
     Client = "Client",
     AuthGuard = "AuthGuard",

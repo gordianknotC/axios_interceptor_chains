@@ -1,6 +1,7 @@
 import { LazyHolder, Logger } from "@gdknot/frontend_common";
-import { _currentEnv } from "@gdknot/frontend_common/dist/extension/extension_setup";
-import { AllowedModule, ELevel,  } from "@gdknot/frontend_common/dist/utils/logger.types"
+import { _currentEnv } from "@gdknot/frontend_common/dist/src/extension/extension_setup";
+import { AllowedModule, ELevel,  } from "@gdknot/frontend_common"
+import colors from "colors/safe";
 
 export enum EModules {
   Client="Client",
@@ -18,7 +19,7 @@ export function logger(module: AllowedModule<EModules>): Logger<EModules>{
  
 const ClientModule: AllowedModule<EModules> = {
   moduleName: EModules.Client,
-  disallowedHandler: (level)=> false,
+  disallowedHandler: (level: ELevel)=> false,
 }
 
 const modules = [
@@ -31,28 +32,27 @@ const modules = [
   {...ClientModule, moduleName: EModules.HeaderUpdater}
 ];
 
-
 Logger.setLevelColors({
-  [ELevel.trace]: (msg) => msg.grey,
+  [ELevel.trace]: colors.grey,
   [ELevel.debug]: function (msg: string): string {
-    return msg.white;
+    return colors.white(msg);
   },
   [ELevel.info]: function (msg: string): string {
-    return msg.blue;
+    return colors.blue(msg);
   },
   [ELevel.warn]: function (msg: string): string {
-    return msg.yellow;
+    return colors.yellow(msg);
   },
   [ELevel.current]: function (msg: string): string {
-    return msg.cyanBG;
+    return colors.bgCyan(msg);
   },
   [ELevel.error]: function (msg: string): string {
-    return msg.red;
+    return colors.red(msg);
   },
   [ELevel.fatal]: function (msg: string): string {
-    return msg.bgBrightRed;
+    return colors.bgRed(msg);
   },
- })
+ });
 
 export const LogModules = Logger.setLoggerAllowanceByEnv({
   test: modules,

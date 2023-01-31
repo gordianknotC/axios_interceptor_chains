@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LogModules = exports.logger = exports.EModules = void 0;
+const tslib_1 = require("tslib");
 const frontend_common_1 = require("@gdknot/frontend_common");
-const logger_types_1 = require("@gdknot/frontend_common/dist/utils/logger.types");
+const frontend_common_2 = require("@gdknot/frontend_common");
+const safe_1 = tslib_1.__importDefault(require("colors/safe"));
 var EModules;
 (function (EModules) {
     EModules["Client"] = "Client";
@@ -31,24 +33,24 @@ const modules = [
     { ...ClientModule, moduleName: EModules.HeaderUpdater }
 ];
 frontend_common_1.Logger.setLevelColors({
-    [logger_types_1.ELevel.trace]: (msg) => msg.grey,
-    [logger_types_1.ELevel.debug]: function (msg) {
-        return msg.white;
+    [frontend_common_2.ELevel.trace]: safe_1.default.grey,
+    [frontend_common_2.ELevel.debug]: function (msg) {
+        return safe_1.default.white(msg);
     },
-    [logger_types_1.ELevel.info]: function (msg) {
-        return msg.blue;
+    [frontend_common_2.ELevel.info]: function (msg) {
+        return safe_1.default.blue(msg);
     },
-    [logger_types_1.ELevel.warn]: function (msg) {
-        return msg.yellow;
+    [frontend_common_2.ELevel.warn]: function (msg) {
+        return safe_1.default.yellow(msg);
     },
-    [logger_types_1.ELevel.current]: function (msg) {
-        return msg.cyanBG;
+    [frontend_common_2.ELevel.current]: function (msg) {
+        return safe_1.default.bgCyan(msg);
     },
-    [logger_types_1.ELevel.error]: function (msg) {
-        return msg.red;
+    [frontend_common_2.ELevel.error]: function (msg) {
+        return safe_1.default.red(msg);
     },
-    [logger_types_1.ELevel.fatal]: function (msg) {
-        return msg.bgBrightRed;
+    [frontend_common_2.ELevel.fatal]: function (msg) {
+        return safe_1.default.bgRed(msg);
     },
 });
 exports.LogModules = frontend_common_1.Logger.setLoggerAllowanceByEnv({

@@ -968,12 +968,12 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@gdknot/frontend_common@0.9.11":
-  version "0.9.11"
-  resolved "https://registry.yarnpkg.com/@gdknot/frontend_common/-/frontend_common-0.9.11.tgz#60dd705ee17fb750d6aa1eaf4173e35d1bbbd83c"
-  integrity sha512-Orc7R+hlzNoJHPXkYNYJjpzhOFXMc7SzSA7FdTXsG0l0YM3KDUjWbi4SW2KMOh6OWiS/opN/uF3P0oAK+vHSqg==
+"@gdknot/frontend_common@0.9.14":
+  version "0.9.14"
+  resolved "https://registry.yarnpkg.com/@gdknot/frontend_common/-/frontend_common-0.9.14.tgz#ba1f0e6c8e261df91b682871b5116ca7fcd389db"
+  integrity sha512-jPby3vMIqxX+m7zv2oP3wtgcssfDbmdPWZnP+wHPzdZ1QxOr2Z+l1aXK+3mt29iXobazujYIJy2KtcQu8obTGQ==
   dependencies:
-    colors "^1.4.0"
+    colors "1.4.0"
     merge-anything "^5.0.4"
     uuid "^9.0.0"
 
@@ -2194,7 +2194,7 @@ color-name@~1.1.4:
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.4.tgz#c2a09a87acbde69543de6f63fa3995c826c536a2"
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
 
-colors@*, colors@^1.4.0:
+colors@*, colors@1.4.0, colors@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.4.0.tgz#c50491479d4c1bdaed2c9ced32cf7c7dc2360f78"
   integrity sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==

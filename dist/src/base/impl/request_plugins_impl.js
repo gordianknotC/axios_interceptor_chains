@@ -28,7 +28,7 @@ class BaseClientServiceRequestPlugin extends plugin_chains_itf_1.BaseClientServi
         return Promise.reject(input);
     }
     assertCanAssemble() {
-        return "";
+        return undefined;
     }
     canGoNext(config) {
         return super.canGoNext(config);

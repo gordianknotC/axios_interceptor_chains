@@ -43,7 +43,7 @@ export abstract class BaseClientServiceRequestPlugin<
   }
 
   assertCanAssemble(): string | undefined {
-    return "";
+    return undefined;
   }
   canGoNext(config: AxiosRequestConfig): boolean {
     return super.canGoNext(config);
