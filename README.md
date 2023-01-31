@@ -7,6 +7,11 @@
 ```bash
 yarn add @gdknot/request_client
 ```
+## dependencies
+```
+yarn add colors
+
+```
 ## documentation
 ```bash
 yarn serve:doc
@@ -137,6 +142,7 @@ table of content
 
 - [前端常用HttpRequestClient:](#%E5%89%8D%E7%AB%AF%E5%B8%B8%E7%94%A8httprequestclient)
   - [安裝](#%E5%AE%89%E8%A3%9D)
+  - [dependencies](#dependencies)
   - [documentation](#documentation)
   - [Feature](#feature)
 - [Table of Content](#table-of-content)

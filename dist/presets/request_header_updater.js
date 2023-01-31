@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExtraRequestHeaderUpdater = exports.AuthRequestHeaderUpdater = void 0;
 const base_request_guard_1 = require("../base/impl/base_request_guard");
-const console_1 = require("console");
+const frontend_common_1 = require("@gdknot/frontend_common");
 /** 自動將 axios request config 寫入正確的 authorization header
  * @example
  * ```ts
@@ -26,7 +26,7 @@ class AuthRequestHeaderUpdater extends base_request_guard_1.BaseRequestHeaderGua
      * 如要放複雜的物件得轉成 json, 並寫於 header 寫入 json 型別
     */
     appendRequestHeader() {
-        (0, console_1.assert)(() => this.tokenGetter() != undefined, "unexpected tokenGetter returns");
+        (0, frontend_common_1.assert)(() => this.tokenGetter() != undefined, "unexpected tokenGetter returns");
         return {
             Authorization: this.tokenGetter(),
         };

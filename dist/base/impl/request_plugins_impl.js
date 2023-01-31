@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BaseClientServiceRequestPlugin = void 0;
-const console_1 = require("console");
+const frontend_common_1 = require("@gdknot/frontend_common");
 const plugin_chains_itf_1 = require("../itf/plugin_chains_itf");
 /**
  * {@inheritdoc BaseClientServicesPluginChains}
@@ -9,7 +9,7 @@ const plugin_chains_itf_1 = require("../itf/plugin_chains_itf");
 class BaseClientServiceRequestPlugin extends plugin_chains_itf_1.BaseClientServicesPluginChains {
     constructor() {
         super();
-        (0, console_1.assert)(() => this.assertCanAssemble() == undefined, ``);
+        (0, frontend_common_1.assert)(() => this.assertCanAssemble() == undefined, ``);
     }
     /** resolve request 並且繼續下一個 request fulfill chain */
     resolve(configOrResponse) {
