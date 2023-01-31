@@ -1,6 +1,6 @@
 {
   "name": "@gdknot/request_client",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "axios interceptors implemented as responsibility chain",
   "scripts": {
     "build": "clear && tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",

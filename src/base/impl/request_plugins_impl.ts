@@ -1,5 +1,5 @@
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-import { assert } from "console";
+import { assert } from "@gdknot/frontend_common";
 import { IBaseClient, IBaseClientProperties, IBaseClientResponsibilityChain } from "../itf/client_itf";
 import {
   BaseClientServicesPluginChains,
