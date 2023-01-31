@@ -16,8 +16,9 @@ export type {
 //
 export type { IBaseClientMethods as IApiClientMethods } from "~/base/itf/client_itf";
 export type { AxiosConfigHeader } from "~/base/impl/request_plugins_impl";
-export { EClientStage, ClientAuthOption } from "~/base/itf/client_itf";
+export { EClientStage } from "~/base/itf/client_itf";
 
+export type { ClientAuthOption } from "~/base/itf/client_itf";
 export type {
   IBaseClient as IClientService,
   ClientOption,
@@ -40,7 +41,10 @@ export { BaseClient as BaseClient } from "~/base/impl/base_client_impl";
 export { BaseClientServiceResponsePlugin } from "~/base/impl/response_plugins_impl";
 export { BaseAuthResponseGuard } from "~/base/impl/base_auth_response_guard";
 export { BaseRequestReplacer } from "~/base/impl/base_request_replacer";
-export { BaseRequestHeaderGuard, RawAxiosHeaders } from "~/base/impl/base_request_guard";
+export { BaseRequestHeaderGuard } from "~/base/impl/base_request_guard";
+export type { RawAxiosHeaders } from "~/base/impl/base_request_guard";
+
+
 //
 //
 //  PRESETS

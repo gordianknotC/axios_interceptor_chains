@@ -30,10 +30,6 @@
       "@/*": [
         "src/*"
       ],
-      /*
-       *     A L I A S   P A T H
-       *     需要同時設置 vue.config.js - alias
-       **/
       "~/*": [
         "src/*"
       ]
