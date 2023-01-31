@@ -7,6 +7,11 @@
 ```bash
 yarn add @gdknot/request_client
 ```
+## dependencies
+```
+yarn add colors
+
+```
 ## documentation
 ```bash
 yarn serve:doc
