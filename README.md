@@ -1,17 +1,11 @@
 
-
-
-# 前端常用HttpRequestClient:
-
+前端 http request client，考慮自動處理授權換發，以責任鍊實作 axios interceptors ，並提供常用責任鍊處理 request/response
+。
 ## 安裝
 ```bash
 yarn add @gdknot/request_client
 ```
-## dependencies
-```
-yarn add colors
 
-```
 ## documentation
 ```bash
 yarn serve:doc
@@ -79,10 +73,10 @@ export const requestClientOption: ClientOption<
     timeout,
   },
   requestChain: [
-    new ClientRequestAuthHeaderUpdater(function () {
+    new ClientRequestAuthHeaderUpdater(function authTokenGetter() {
       return authToken.value;
     }),
-    new ClientRequestExtraHeaderUpdater(function () {
+    new ClientRequestExtraHeaderUpdater(function extraHeaderGetter() {
       return formatHeader.value;
     }),
     new RequestReplacer(
@@ -140,9 +134,7 @@ const client = new RequestClient(requestClientOption)
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 table of content
 
-- [前端常用HttpRequestClient:](#%E5%89%8D%E7%AB%AF%E5%B8%B8%E7%94%A8httprequestclient)
   - [安裝](#%E5%AE%89%E8%A3%9D)
-  - [dependencies](#dependencies)
   - [documentation](#documentation)
   - [Feature](#feature)
 - [Table of Content](#table-of-content)
