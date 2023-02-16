@@ -1,6 +1,9 @@
 
-前端 http request client，考慮自動處理授權換發，以責任鍊實作 axios interceptors ，並提供常用責任鍊處理 request/response
-。
+前端 http request client
+- 以責任鍊實作 axios interceptors 
+- 提供常用 RequestGuard/ResponseGuard
+- 考慮自動處理授權換發
+
 ## 安裝
 ```bash
 yarn add @gdknot/request_client
