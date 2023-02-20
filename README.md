@@ -29,6 +29,8 @@ yarn serve:doc
   - mocking axios internal adapter hence we can test axios interceptors without breaking the internal part
   - a simple util for mocking server response
   
+## Usage
+
 ```ts
 import {
   UpdateAuthHeaderPlugin,
